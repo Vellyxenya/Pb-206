@@ -11,8 +11,13 @@ config_version=5
 [application]
 
 config/name="pb-206"
+run/main_scene="uid://cuvru8fjpuk0n"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+IsotopeData="*uid://dapinegq6eoua"
 
 [physics]
 

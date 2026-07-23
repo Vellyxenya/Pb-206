@@ -1,3 +1,8 @@
 [gd_scene format=3 uid="uid://cuvru8fjpuk0n"]
 
+[ext_resource type="PackedScene" uid="uid://cxqbtqjhdqt4k" path="res://Scenes/atom.tscn" id="1_ebmjs"]
+
 [node name="Game" type="Node2D" unique_id=1236288522]
+
+[node name="Atom" parent="." unique_id=53324152 instance=ExtResource("1_ebmjs")]
+position = Vector2(582, 327)

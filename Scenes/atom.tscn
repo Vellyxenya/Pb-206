@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cxqbtqjhdqt4k"]
+
+[ext_resource type="Script" uid="uid://k32p6gycnyrv" path="res://Scripts/atom.gd" id="1_cdecr"]
+
+[node name="Atom" type="Node2D" unique_id=53324152]
+script = ExtResource("1_cdecr")

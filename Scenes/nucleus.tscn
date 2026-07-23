@@ -1,0 +1,121 @@
+[gd_scene format=3 uid="uid://bywul5wkrxeqd"]
+
+[ext_resource type="Texture2D" uid="uid://c13mcx4a0ulqm" path="res://Assets/nucleus_spritesheet.png" id="1_gyxa0"]
+[ext_resource type="Script" path="res://Scripts/nucleus.gd" id="1_vt7ja"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7fq3c"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(0, 256, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k5lue"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(128, 256, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ejrie"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(256, 256, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ndjcy"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(384, 256, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gyxa0"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(0, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_re82n"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(128, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2a57v"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(256, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_xpoae"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(384, 128, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vt7ja"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lkh8b"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_47j3p"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_eu3w7"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mcs13"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(0, 128, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_sfggm"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7fq3c")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k5lue")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ejrie")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ndjcy")
+}],
+"loop": true,
+"name": &"neutron",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gyxa0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_re82n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2a57v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_xpoae")
+}],
+"loop": true,
+"name": &"proton",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vt7ja")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lkh8b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_47j3p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_eu3w7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mcs13")
+}],
+"loop": false,
+"name": &"spawn",
+"speed": 10.0
+}]
+
+[node name="Nucleus" type="Node2D" unique_id=2070315211]
+script = ExtResource("1_vt7ja")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1916345401]
+sprite_frames = SubResource("SpriteFrames_sfggm")
+animation = &"neutron"
+autoplay = "spawn"
