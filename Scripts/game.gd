@@ -25,10 +25,13 @@ const GOAL_VISUAL_SEGMENTS: int = 64
 var is_transitioning: bool = false
 var is_game_over: bool = false
 var starting_isotope_key: String = ""
+var current_phase_index: int = 1
 var _bleep_time_left: float = 0.0
 var neutron_fields: Array[Area2D] = []
 var active_neutron_fields: Dictionary = {}
 var lucky_popup_tween: Tween
+var phase_sounds: Array[AudioStream] = []
+var phase_audio_player: AudioStreamPlayer
 
 @onready var atom: RigidBody2D = $Player/Atom
 @onready var camera: Camera2D = $Player/Atom/Camera2D
@@ -63,6 +66,9 @@ func _ready() -> void:
 	if lucky_popup_label != null:
 		lucky_popup_label.visible = false
 	Engine.time_scale = 1.0
+
+	_setup_phase_audio()
+	_play_sound_for_phase(current_phase_index)
 
 	_rebuild_goal_visual()
 	randomize_goal_position()
@@ -174,11 +180,17 @@ func advance_to_next_phase() -> void:
 	if game_over_overlay != null:
 		game_over_overlay.visible = false
 
+	var advanced = false
 	if atom != null:
 		atom.on_phase_completed()
 		var current_data = IsotopeData.get_isotope(atom.isotope_key)
 		if not current_data.is_empty() and current_data.get("next_isotope") != null:
 			atom.isotope_key = str(current_data.next_isotope)
+			advanced = true
+
+	if advanced:
+		current_phase_index += 1
+	_play_sound_for_phase(current_phase_index)
 
 	randomize_goal_position()
 	spawn_neutron_fields()
@@ -195,6 +207,8 @@ func restart_current_phase() -> void:
 
 	if atom != null and not starting_isotope_key.is_empty():
 		atom.isotope_key = starting_isotope_key
+	current_phase_index = 1
+	_play_sound_for_phase(current_phase_index)
 
 	randomize_goal_position()
 	spawn_neutron_fields()
@@ -499,3 +513,72 @@ func _get_goal_arrow_distance() -> float:
 		return goal_arrow_padding
 
 	return circle.radius + goal_arrow_padding
+
+func _setup_phase_audio() -> void:
+	phase_audio_player = AudioStreamPlayer.new()
+	phase_audio_player.name = "PhaseAudioPlayer"
+	phase_audio_player.bus = "Master"
+	phase_audio_player.autoplay = false
+	add_child(phase_audio_player)
+
+	phase_sounds = _load_phase_sounds()
+
+func _load_phase_sounds() -> Array[AudioStream]:
+	var sounds: Array[AudioStream] = []
+	var entries: Array[Dictionary] = []
+
+	var dir = DirAccess.open("res://Assets/Sounds")
+	if dir == null:
+		push_warning("Assets/Sounds folder not found. Phase sounds disabled.")
+		return sounds
+
+	for file_name in dir.get_files():
+		if file_name.ends_with(".import"):
+			continue
+		var phase_number = _extract_phase_number(file_name)
+		if phase_number <= 0:
+			continue
+		entries.append({
+			"phase": phase_number,
+			"path": "res://Assets/Sounds/" + file_name
+		})
+
+	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a["phase"]) < int(b["phase"]) )
+
+	for entry in entries:
+		var stream = load(String(entry["path"])) as AudioStream
+		if stream != null:
+			sounds.append(stream)
+
+	return sounds
+
+func _extract_phase_number(file_name: String) -> int:
+	var base = file_name.get_basename().to_lower()
+	if not base.begins_with("kf"):
+		return -1
+
+	var digits = ""
+	for i in range(2, base.length()):
+		var ch = base.substr(i, 1)
+		if ch >= "0" and ch <= "9":
+			digits += ch
+		else:
+			break
+
+	if digits.is_empty():
+		return -1
+	return int(digits)
+
+func _play_sound_for_phase(phase_index: int) -> void:
+	if phase_audio_player == null or phase_sounds.is_empty():
+		return
+	if phase_index <= 0:
+		return
+	if phase_index > phase_sounds.size():
+		push_warning("No phase sound found for phase " + str(phase_index))
+		return
+
+	phase_audio_player.stop()
+	phase_audio_player.stream = phase_sounds[phase_index - 1]
+	phase_audio_player.play()

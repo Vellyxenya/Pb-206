@@ -114,8 +114,6 @@ text = "Main Menu"
 [node name="GoalArea" type="Node2D" parent="." unique_id=820211187]
 position = Vector2(720, 200)
 
-[node name="Hazards" type="Node2D" parent="." unique_id=2085012273]
-
 [node name="GoalFill" type="Polygon2D" parent="GoalArea" unique_id=1778625098]
 color = Color(0.3, 0.8, 0.3, 0.32)
 polygon = PackedVector2Array(0, -50, 24, -44, 44, -24, 50, 0, 44, 24, 24, 44, 0, 50, -24, 44, -44, 24, -50, 0, -44, -24, -24, -44)
@@ -125,6 +123,8 @@ points = PackedVector2Array(0, -50, 24, -44, 44, -24, 50, 0, 44, 24, 24, 44, 0, 
 width = 4.0
 default_color = Color(0.22, 0.6, 0.22, 0.95)
 antialiased = true
+
+[node name="Hazards" type="Node2D" parent="." unique_id=2085012273]
 
 [node name="Background" type="Node2D" parent="." unique_id=1970185643]
 z_index = -10
