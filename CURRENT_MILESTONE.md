@@ -1,153 +1,152 @@
-# Current Milestone: M6 - Decay Animation, Chain Decay, and Game Over Flow
+# Current Milestone: M7 - Basic Hazards (Neutron Fields)
 
 ## Goal
-Implement full phase resolution behavior:
-- Success at timer end decays to the next isotope in the chain.
-- Failure at timer end plays destroy animations and enters a slowed game-over state.
-- New finish area positions are always far from the player so spawn-inside is impossible.
+Add the first hazard type: neutron fields that penalize the player when touched.
 
 ## Why This Matters
-M5 established the timer + finish rule. M6 now makes outcome handling complete and explicit:
-- Success advances progression.
-- Failure creates consequence and player agency (Restart/Main Menu).
-- Goal placement quality stays consistent and fair.
+M6 completed phase outcomes and game-over flow. M7 introduces risk during navigation so reaching the finish area is no longer only a movement/time challenge.
 
 ## Prerequisites
-- M5 complete (finish area + in/out status + guidance arrow)
-- M4 complete (timer + phase end signal)
+- M6 complete (success/fail resolution, game over UI, restart flow)
+- Goal system and timer system working
 
 ---
 
 ## Step-by-Step Instructions
 
-### Step 1: Add Transition + Game Over State in `Scripts/game.gd`
-Add exports/state:
+### Step 1: Create Hazard Scene
+Create a new scene `Scenes/neutron_field.tscn`:
+1. Root: `Area2D` named `NeutronField`
+2. Child: `CollisionShape2D` with `CircleShape2D`
+3. Child: `Polygon2D` or `Line2D` for simple visible ring
+4. Attach script: `Scripts/neutron_field.gd`
+
+### Step 2: Create Hazard Script
+Create `Scripts/neutron_field.gd`:
 
 ```gdscript
-@export var transition_duration: float = 0.8
-@export var game_over_time_scale: float = 0.22
-@export var min_goal_edge_distance: float = 900.0
-@export var max_goal_center_distance: float = 5200.0
+extends Area2D
 
-var is_transitioning: bool = false
-var is_game_over: bool = false
+signal hazard_triggered
+
+@export var radius: float = 180.0
+@export var damage_seconds: float = 8.0
+@export var tick_interval: float = 0.5
+
+var _atom_inside: RigidBody2D = null
+var _tick_accum: float = 0.0
+
+func _ready() -> void:
+body_entered.connect(_on_body_entered)
+body_exited.connect(_on_body_exited)
+_update_shape()
+
+func _physics_process(delta: float) -> void:
+if _atom_inside == null:
+return
+_tick_accum += delta
+if _tick_accum < tick_interval:
+return
+_tick_accum = 0.0
+_apply_hazard_tick()
+
+func _on_body_entered(body: Node) -> void:
+if body != null and body.name == "Atom":
+_atom_inside = body as RigidBody2D
+_tick_accum = 0.0
+
+func _on_body_exited(body: Node) -> void:
+if body == _atom_inside:
+_atom_inside = null
+
+func _apply_hazard_tick() -> void:
+if _atom_inside == null:
+return
+if _atom_inside.has_method("apply_hazard_time_penalty"):
+_atom_inside.apply_hazard_time_penalty(damage_seconds)
+hazard_triggered.emit()
+
+func _update_shape() -> void:
+var collision = $CollisionShape2D
+if collision != null and collision.shape is CircleShape2D:
+(collision.shape as CircleShape2D).radius = radius
 ```
 
-### Step 2: Add UI for Failure Choice in `Scenes/game.tscn`
-Under `UI`, add a hidden fullscreen overlay:
-- `ColorRect` named `GameOverOverlay`
-- Dark translucent background
-- Child `Panel` with:
-  - `Label` title (`GameOverTitle`)
-  - `Button` `RestartButton`
-  - `Button` `MainMenuButton`
-
-### Step 3: Cache and Wire Overlay Nodes in `Scripts/game.gd`
-Add onready refs and connect button signals in `_ready()`:
+### Step 3: Add Timer Penalty API on Atom
+In `Scripts/atom.gd`, add:
 
 ```gdscript
-@onready var game_over_overlay: ColorRect = $UI/GameOverOverlay
-@onready var restart_button: Button = $UI/GameOverOverlay/GameOverPanel/RestartButton
-@onready var main_menu_button: Button = $UI/GameOverOverlay/GameOverPanel/MainMenuButton
+func apply_hazard_time_penalty(seconds: float) -> void:
+if not phase_active:
+return
+phase_time_left = max(0.0, phase_time_left - seconds)
+if phase_time_left <= 0.0:
+phase_time_left = 0.0
+phase_active = false
+on_phase_timer_finished()
 ```
 
-### Step 4: Keep Timer-End Split, But Remove Auto-Respawn on Fail
-In `_on_atom_phase_timer_finished()`:
-- inside finish area -> `start_phase_transition(true)`
-- outside finish area -> `start_phase_transition(false)`
+### Step 4: Add Hazard Container to Game Scene
+In `Scenes/game.tscn`, under `Game`, add `Node2D` named `Hazards`.
 
-In fail branch inside `start_phase_transition(false)`:
-1. play nuclei destroy animation
-2. flash red
-3. enter game over state
+### Step 5: Spawn Initial Neutron Fields
+In `Scripts/game.gd`:
+1. preload `neutron_field.tscn`
+2. add exports:
+   - `hazard_count`
+   - `hazard_min_goal_distance`
+   - `hazard_min_player_distance`
+3. add `spawn_neutron_fields()` called in `_ready()` and when phase resets/advances.
 
-Do **not** call restart automatically.
+### Step 6: Safe Placement Rules
+When spawning each hazard:
+- Keep away from atom start position
+- Keep away from finish area center
+- Keep inside a broad play band around player
+- Retry random samples up to N attempts
 
-### Step 5: Slow Time + Show Choice on Failure
-Add `enter_game_over_state()`:
+### Step 7: Add Hazard UI Feedback
+Add a small label under existing timer/status:
+- `HazardStatusLabel` in `UI`
+- Update text when hazard triggers:
+  - e.g. `"Neutron Field: -8.0s"`
+- Fade/clear after ~1 second.
 
-```gdscript
-func enter_game_over_state() -> void:
-is_game_over = true
-Engine.time_scale = game_over_time_scale
-game_over_overlay.visible = true
-```
+### Step 8: Respawn Hazards on Phase Change
+In both success and restart flows in `game.gd`:
+- clear old hazards
+- spawn new hazards after goal randomization
 
-### Step 6: Implement Restart and Main Menu Actions
-- `Restart`:
-  - hide overlay
-  - restore `Engine.time_scale = 1.0`
-  - restart current isotope phase (new timer + new visuals + new far goal)
-- `Main Menu`:
-  - if `res://Scenes/main_menu.tscn` exists, change scene
-  - otherwise exit gracefully (temporary fallback)
-
-### Step 7: Success Must Decay to Next Isotope in Chain
-In `advance_to_next_phase()`:
-1. read current isotope from `IsotopeData`
-2. get `next_isotope`
-3. set `atom.isotope_key` to `next_isotope` when present
-4. reload isotope data + respawn nuclei visuals
-
-### Step 8: Enforce Far Goal Randomization
-Replace viewport-local randomization with radial randomization around player:
-- minimum center distance = `goal_radius + min_goal_edge_distance`
-- random direction + random radius
-- retry several attempts
-
-This guarantees the player cannot start inside the finish area.
-
-### Step 9: Preserve Existing Guidance/Status Rules
-While transitioning or game over:
-- hide arrow guidance
-- keep finish status visible
-
-### Step 10: Run and Validate
+### Step 9: Run and Validate
 1. Press F5.
-2. Success case (inside area at timer=0):
-   - green flash
-   - atom decays to next isotope in chain
-   - new far finish area appears
-3. Failure case (outside area at timer=0):
-   - nuclei destroy animation plays
-   - red flash
-   - game slows down
-   - game-over overlay appears with Restart/Main Menu
-   - no auto-respawn
-4. Press Restart:
-   - game returns to normal speed
-   - current isotope restarts
-   - new finish area is far from player
-5. Verify player never starts inside finish area.
+2. Enter neutron field.
+3. Confirm timer drops by penalty ticks.
+4. Confirm hazard feedback text appears.
+5. Confirm hazards respawn after success and restart.
 
 ---
 
 ## Verification Checklist
 
-- [ ] Success path decays to `next_isotope`
-- [ ] Fail path does not auto-respawn
-- [ ] Fail path plays destroy animation on all nuclei
-- [ ] Fail path enters slowed game-over state
-- [ ] Game-over overlay shows Restart/Main Menu
-- [ ] Restart restores normal speed and restarts phase
-- [ ] Main Menu action works (scene switch or fallback exit)
-- [ ] Goal is always spawned far from player
-- [ ] Player never starts inside finish area
+- [ ] `NeutronField` scene exists with `Area2D` + collision
+- [ ] Atom exposes `apply_hazard_time_penalty()`
+- [ ] Hazard contact reduces phase timer
+- [ ] Timer-end behavior still follows M6 rules
+- [ ] Hazards avoid spawning on top of player/goal
+- [ ] Hazards respawn on phase transition/restart
 - [ ] No script/runtime errors
 
 ---
 
 ## Expected Result
 
-At timer end:
-- Inside area -> transition flash + isotope decays to next chain entry + new far goal.
-- Outside area -> destroy animation + red flash + slowed game-over screen with player choice.
+Neutron fields now create active danger: staying in them drains phase time and increases fail risk, while M6 game-over and chain progression behavior remain intact.
 
 ---
 
 ## Next Step
 
 When checklist is fully validated, reply with:
-**M6 Complete!**
+**M7 Complete!**
 
-Then move to M7 (Basic Hazards - Neutron Fields).
+Then move to M8 (Containment Walls).

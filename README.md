@@ -66,9 +66,9 @@ This project uses a **milestone-based approach** with clear verification at each
 
 ## 📊 Current Progress
 
-**Active Milestone:** M6 - Decay Animation & Goal Randomization  
-**Completed Milestones:** M0 ✓, M1 ✓, M2 ✓, M3 ✓, M4 ✓, M5 ✓  
-**Next Up:** M7 - Basic Hazards (Neutron Fields)
+**Active Milestone:** M7 - Basic Hazards (Neutron Fields)  
+**Completed Milestones:** M0 ✓, M1 ✓, M2 ✓, M3 ✓, M4 ✓, M5 ✓, M6 ✓  
+**Next Up:** M8 - Containment Walls
 
 ### Milestone Overview:
 
@@ -78,8 +78,8 @@ This project uses a **milestone-based approach** with clear verification at each
 - [x] **M3:** Mass-Based Movement (Data-Driven) ✓ **COMPLETE**
 - [x] **M4:** Phase Timer System ✓ **COMPLETE**
 - [x] **M5:** Goal Area System ✓ **COMPLETE**
-- [ ] **M6:** Decay Animation & Goal Randomization ← **YOU ARE HERE**
-- [ ] **M7:** Basic Hazards (Neutron Fields)
+- [x] **M6:** Decay Animation & Goal Randomization ✓ **COMPLETE**
+- [ ] **M7:** Basic Hazards (Neutron Fields) ← **YOU ARE HERE**
 - [ ] **M8:** Containment Walls
 - [ ] **M9:** Complete Isotope Data
 - [ ] **M10:** Phase Transitions (Decay)
@@ -93,10 +93,10 @@ This project uses a **milestone-based approach** with clear verification at each
 
 **Right now:**
 1. Open `CURRENT_MILESTONE.md`
-2. Follow the M6 (Decay Animation & Goal Randomization) instructions
-3. Validate both success/fail transition paths at timer end
-4. When complete, tell me "M6 Complete!"
-5. I'll advance everything to M7
+2. Follow the M7 (Basic Hazards - Neutron Fields) instructions
+3. Validate hazard timer penalties and respawn behavior
+4. When complete, tell me "M7 Complete!"
+5. I'll advance everything to M8
 
 **Need help first?**
 - Open `GODOT_UI_GUIDE.md` to familiarize yourself with Godot
