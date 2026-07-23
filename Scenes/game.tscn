@@ -26,6 +26,17 @@ offset_bottom = 86.0
 theme_override_font_sizes/font_size = 20
 text = "Finish Area: OUT. Hurry to the area before the timer runs out!"
 
+[node name="LuckyPopupLabel" type="Label" parent="UI" unique_id=1760245902]
+visible = false
+offset_left = 620.0
+offset_top = 360.0
+offset_right = 820.0
+offset_bottom = 408.0
+theme_override_colors/font_color = Color(1, 0.98, 0.76, 1)
+theme_override_font_sizes/font_size = 34
+text = "I got lucky"
+horizontal_alignment = 1
+
 [node name="TransitionFlash" type="ColorRect" parent="UI" unique_id=948063964]
 visible = false
 anchors_preset = 15
@@ -102,6 +113,8 @@ text = "Main Menu"
 
 [node name="GoalArea" type="Node2D" parent="." unique_id=820211187]
 position = Vector2(720, 200)
+
+[node name="Hazards" type="Node2D" parent="." unique_id=2085012273]
 
 [node name="GoalFill" type="Polygon2D" parent="GoalArea" unique_id=1778625098]
 color = Color(0.3, 0.8, 0.3, 0.32)

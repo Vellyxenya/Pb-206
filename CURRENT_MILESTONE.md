@@ -1,10 +1,10 @@
 # Current Milestone: M7 - Basic Hazards (Neutron Fields)
 
 ## Goal
-Add the first hazard type: neutron fields that penalize the player when touched.
+Add the first hazard type: neutron fields embedded directly in the existing game scene.
 
 ## Why This Matters
-M6 completed phase outcomes and game-over flow. M7 introduces risk during navigation so reaching the finish area is no longer only a movement/time challenge.
+M6 completed phase outcomes and game-over flow. M7 introduces risk during navigation so reaching the finish area is no longer only a movement/time challenge. Instead of constant damage, hazard pressure is now event-based: each bleep is a high-stakes moment.
 
 ## Prerequisites
 - M6 complete (success/fail resolution, game over UI, restart flow)
@@ -14,123 +14,110 @@ M6 completed phase outcomes and game-over flow. M7 introduces risk during naviga
 
 ## Step-by-Step Instructions
 
-### Step 1: Create Hazard Scene
-Create a new scene `Scenes/neutron_field.tscn`:
-1. Root: `Area2D` named `NeutronField`
-2. Child: `CollisionShape2D` with `CircleShape2D`
-3. Child: `Polygon2D` or `Line2D` for simple visible ring
-4. Attach script: `Scripts/neutron_field.gd`
+### Step 1: Add Hazards In Existing Scene
+Do **not** create a new scene. Add hazards directly to `Scenes/game.tscn`:
+1. Under `Game`, add `Node2D` named `Hazards`
+2. Add one `Area2D` child template named `NeutronField`
+3. Give it a `CollisionShape2D` with `CircleShape2D`
+4. Add simple visual children (`Polygon2D`/`Line2D`/`Sprite2D`)
+5. Duplicate this in-scene field or instantiate extra `Area2D` fields from `game.gd`
 
 ### Step 2: Create Hazard Script
-Create `Scripts/neutron_field.gd`:
+Implement hazard logic inside `Scripts/game.gd` (or lightweight helper script) with periodic bleeps:
 
 ```gdscript
-extends Area2D
+@export var neutron_bleep_interval: float = 2.0
+@export var neutron_kill_chance: float = 0.28
 
-signal hazard_triggered
-
-@export var radius: float = 180.0
-@export var damage_seconds: float = 8.0
-@export var tick_interval: float = 0.5
-
-var _atom_inside: RigidBody2D = null
-var _tick_accum: float = 0.0
-
-func _ready() -> void:
-body_entered.connect(_on_body_entered)
-body_exited.connect(_on_body_exited)
-_update_shape()
+var _bleep_time_left: float = 0.0
 
 func _physics_process(delta: float) -> void:
-if _atom_inside == null:
+_bleep_time_left -= delta
+if _bleep_time_left > 0.0:
 return
-_tick_accum += delta
-if _tick_accum < tick_interval:
-return
-_tick_accum = 0.0
-_apply_hazard_tick()
 
-func _on_body_entered(body: Node) -> void:
-if body != null and body.name == "Atom":
-_atom_inside = body as RigidBody2D
-_tick_accum = 0.0
+_bleep_time_left = neutron_bleep_interval
+run_neutron_bleep()
 
-func _on_body_exited(body: Node) -> void:
-if body == _atom_inside:
-_atom_inside = null
-
-func _apply_hazard_tick() -> void:
-if _atom_inside == null:
-return
-if _atom_inside.has_method("apply_hazard_time_penalty"):
-_atom_inside.apply_hazard_time_penalty(damage_seconds)
-hazard_triggered.emit()
-
-func _update_shape() -> void:
-var collision = $CollisionShape2D
-if collision != null and collision.shape is CircleShape2D:
-(collision.shape as CircleShape2D).radius = radius
+func run_neutron_bleep() -> void:
+# For each neutron field, if atom is inside at bleep time:
+#   - roll RNG
+#   - on fail: trigger game over flow
+#   - on survive: show floating "I got lucky"
 ```
 
-### Step 3: Add Timer Penalty API on Atom
-In `Scripts/atom.gd`, add:
+### Step 3: Add In-Field Check Helper
+In `Scripts/game.gd`, add a helper to test whether atom is inside a field at bleep time:
 
 ```gdscript
-func apply_hazard_time_penalty(seconds: float) -> void:
-if not phase_active:
-return
-phase_time_left = max(0.0, phase_time_left - seconds)
-if phase_time_left <= 0.0:
-phase_time_left = 0.0
-phase_active = false
-on_phase_timer_finished()
+func is_atom_inside_field(field: Area2D) -> bool:
+if atom == null or field == null:
+return false
+for body in field.get_overlapping_bodies():
+if body == atom:
+return true
+return false
 ```
 
-### Step 4: Add Hazard Container to Game Scene
-In `Scenes/game.tscn`, under `Game`, add `Node2D` named `Hazards`.
+### Step 4: Bleep Resolution Rule
+During each bleep for each field:
+1. If atom is not inside: nothing happens
+2. If atom is inside:
+  - Roll random chance
+  - If roll <= `neutron_kill_chance`: trigger existing M6 failure/game-over flow
+  - Else: player survives and gets visual feedback
 
-### Step 5: Spawn Initial Neutron Fields
-In `Scripts/game.gd`:
-1. preload `neutron_field.tscn`
-2. add exports:
-   - `hazard_count`
-   - `hazard_min_goal_distance`
-   - `hazard_min_player_distance`
-3. add `spawn_neutron_fields()` called in `_ready()` and when phase resets/advances.
+### Step 5: Add "I got lucky" Floating Feedback
+In `Scenes/game.tscn`, under `UI`, add a label for transient hazard feedback:
+- `LuckyPopupLabel` (initially hidden)
 
-### Step 6: Safe Placement Rules
-When spawning each hazard:
-- Keep away from atom start position
+In `Scripts/game.gd`, add a helper like:
+
+```gdscript
+func show_lucky_popup(world_pos: Vector2) -> void:
+# Set text: "I got lucky"
+# Position near player or above field
+# Tween upward and fade alpha to 0
+# Hide/reset after tween
+```
+
+### Step 6: Hazard Placement in Current Scene
+If hazards are generated dynamically in `game.gd`, keep safe placement rules:
+- Keep away from atom spawn
 - Keep away from finish area center
-- Keep inside a broad play band around player
+- Keep inside broad play band around player
 - Retry random samples up to N attempts
 
+If hazards are manually authored in `game.tscn`, ensure they are not placed on the initial player spawn.
+
 ### Step 7: Add Hazard UI Feedback
-Add a small label under existing timer/status:
-- `HazardStatusLabel` in `UI`
-- Update text when hazard triggers:
-  - e.g. `"Neutron Field: -8.0s"`
-- Fade/clear after ~1 second.
+Keep existing timer/status labels.
+Add short bleep feedback states:
+- Optional text when a field bleeps while player is outside (for debugging)
+- Mandatory floating `"I got lucky"` when player survives a lethal roll
 
 ### Step 8: Respawn Hazards on Phase Change
 In both success and restart flows in `game.gd`:
 - clear old hazards
-- spawn new hazards after goal randomization
+- rebuild/reposition hazards after goal randomization (still within current scene flow)
 
 ### Step 9: Run and Validate
 1. Press F5.
-2. Enter neutron field.
-3. Confirm timer drops by penalty ticks.
-4. Confirm hazard feedback text appears.
+2. Enter neutron field and wait for a bleep.
+3. Confirm chance-based resolution at bleep moment.
+4. On survival, confirm `"I got lucky"` appears, moves upward, and fades out.
+5. On fail, confirm M6 game-over path triggers correctly.
 5. Confirm hazards respawn after success and restart.
 
 ---
 
 ## Verification Checklist
 
-- [ ] `NeutronField` scene exists with `Area2D` + collision
-- [ ] Atom exposes `apply_hazard_time_penalty()`
-- [ ] Hazard contact reduces phase timer
+- [ ] `NeutronField` Area2D nodes exist in `Scenes/game.tscn` with collision
+- [ ] Hazards are implemented in current scene flow (no separate hazard scene dependency)
+- [ ] Hazards bleep every N seconds
+- [ ] If inside on bleep: chance-based game-over roll is applied
+- [ ] Surviving a lethal roll shows floating/fading `"I got lucky"`
 - [ ] Timer-end behavior still follows M6 rules
 - [ ] Hazards avoid spawning on top of player/goal
 - [ ] Hazards respawn on phase transition/restart
@@ -140,7 +127,7 @@ In both success and restart flows in `game.gd`:
 
 ## Expected Result
 
-Neutron fields now create active danger: staying in them drains phase time and increases fail risk, while M6 game-over and chain progression behavior remain intact.
+Neutron fields now create active danger through periodic bleep checks: being inside at bleep time can instantly end the run by chance, while lucky survivals produce visible floating feedback. M6 game-over and chain progression behavior remain intact.
 
 ---
 
