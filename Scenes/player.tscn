@@ -1,0 +1,14 @@
+[gd_scene format=3 uid="uid://mttryj5fq7wk"]
+
+[ext_resource type="Script" uid="uid://w7ym7veiniy0" path="res://Scripts/player.gd" id="1_0q8th"]
+[ext_resource type="PackedScene" uid="uid://cxqbtqjhdqt4k" path="res://Scenes/atom.tscn" id="2_ehw5f"]
+
+[node name="Player" type="Node2D" unique_id=518713802]
+script = ExtResource("1_0q8th")
+
+[node name="Atom" parent="." unique_id=1907918391 instance=ExtResource("2_ehw5f")]
+
+[node name="Camera2D" type="Camera2D" parent="Atom"]
+position_smoothing_enabled = true
+position_smoothing_speed = 6.0
+enabled = true

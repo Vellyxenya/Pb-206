@@ -19,6 +19,13 @@ config/icon="res://icon.svg"
 
 IsotopeData="*uid://dapinegq6eoua"
 
+[display]
+
+window/size/viewport_width=1440
+window/size/viewport_height=900
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
@@ -26,3 +33,4 @@ IsotopeData="*uid://dapinegq6eoua"
 [rendering]
 
 rendering_device/driver.windows="d3d12"
+environment/defaults/default_clear_color=Color(0.86, 0.94, 1, 1)

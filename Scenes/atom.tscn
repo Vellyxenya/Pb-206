@@ -2,5 +2,13 @@
 
 [ext_resource type="Script" uid="uid://k32p6gycnyrv" path="res://Scripts/atom.gd" id="1_cdecr"]
 
-[node name="Atom" type="Node2D" unique_id=53324152]
+[sub_resource type="CircleShape2D" id="CircleShape2D_cdecr"]
+radius = 79.07591
+
+[node name="Atom" type="RigidBody2D" unique_id=942030519]
+gravity_scale = 0.0
+lock_rotation = true
 script = ExtResource("1_cdecr")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=43329047]
+shape = SubResource("CircleShape2D_cdecr")
