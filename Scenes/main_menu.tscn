@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://d2m3unejt7bfv"]
+
+[ext_resource type="Script" uid="uid://c6bhfpia8tmhf" path="res://Scripts/main_menu.gd" id="1_mainmenu"]
+
+[node name="MainMenu" type="Control" unique_id=521885236]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_mainmenu")
+
+[node name="Backdrop" type="ColorRect" parent="." unique_id=33964642]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.14304897, 0.21697012, 0.2842265, 1)
+
+[node name="Center" type="CenterContainer" parent="." unique_id=569467137]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center" unique_id=2072881326]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="Title" type="Label" parent="Center/VBox" unique_id=375065300]
+layout_mode = 2
+theme_override_font_sizes/font_size = 72
+text = "PB-206"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/VBox" unique_id=857131821]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+text = "Lead Me Home"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="Center/VBox" unique_id=1824584736]
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="Center/VBox" unique_id=1026234577]
+custom_minimum_size = Vector2(280, 56)
+layout_mode = 2
+text = "Start Run"
+
+[node name="QuitButton" type="Button" parent="Center/VBox" unique_id=25659451]
+custom_minimum_size = Vector2(280, 56)
+layout_mode = 2
+text = "Quit"
+
+[node name="Hint" type="Label" parent="Center/VBox" unique_id=1609385451]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.84, 0.9, 1)
+theme_override_font_sizes/font_size = 16
+text = "M5/M6 debug: T = -10s timer, Y = teleport 100 units toward cursor"
+horizontal_alignment = 1
