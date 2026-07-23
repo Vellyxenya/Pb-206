@@ -66,9 +66,9 @@ This project uses a **milestone-based approach** with clear verification at each
 
 ## 📊 Current Progress
 
-**Active Milestone:** M4 - Phase Timer System  
-**Completed Milestones:** M0 ✓, M1 ✓, M2 ✓, M3 ✓  
-**Next Up:** M5 - Goal Area System
+**Active Milestone:** M6 - Decay Animation & Goal Randomization  
+**Completed Milestones:** M0 ✓, M1 ✓, M2 ✓, M3 ✓, M4 ✓, M5 ✓  
+**Next Up:** M7 - Basic Hazards (Neutron Fields)
 
 ### Milestone Overview:
 
@@ -77,8 +77,8 @@ This project uses a **milestone-based approach** with clear verification at each
 - [x] **M2:** Mouse Following Movement ✓ **COMPLETE**
 - [x] **M3:** Mass-Based Movement (Data-Driven) ✓ **COMPLETE**
 - [x] **M4:** Phase Timer System ✓ **COMPLETE**
-- [ ] **M5:** Goal Area System ← **YOU ARE HERE**
-- [ ] **M6:** Win/Lose Conditions
+- [x] **M5:** Goal Area System ✓ **COMPLETE**
+- [ ] **M6:** Decay Animation & Goal Randomization ← **YOU ARE HERE**
 - [ ] **M7:** Basic Hazards (Neutron Fields)
 - [ ] **M8:** Containment Walls
 - [ ] **M9:** Complete Isotope Data
@@ -93,9 +93,10 @@ This project uses a **milestone-based approach** with clear verification at each
 
 **Right now:**
 1. Open `CURRENT_MILESTONE.md`
-2. Follow the M4 (Phase Timer System) instructions
-3. When complete, tell me "M4 Complete!"
-4. I'll advance everything to M5
+2. Follow the M6 (Decay Animation & Goal Randomization) instructions
+3. Validate both success/fail transition paths at timer end
+4. When complete, tell me "M6 Complete!"
+5. I'll advance everything to M7
 
 **Need help first?**
 - Open `GODOT_UI_GUIDE.md` to familiarize yourself with Godot
