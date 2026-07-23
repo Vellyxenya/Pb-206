@@ -1,8 +1,25 @@
 [gd_scene format=3 uid="uid://cuvru8fjpuk0n"]
 
 [ext_resource type="PackedScene" path="res://Scenes/player.tscn" id="1_ebmjs"]
+[ext_resource type="Script" path="res://Scripts/game.gd" id="2_gamescript"]
+[ext_resource type="Shader" path="res://Assets/Shaders/InfiniteBackground.gdshader" id="3_bgshader"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_bgpattern"]
+shader = ExtResource("3_bgshader")
 
 [node name="Game" type="Node2D" unique_id=1236288522]
+script = ExtResource("2_gamescript")
+
+[node name="BackgroundLayer" type="CanvasLayer" parent="."]
+layer = -10
+
+[node name="Background" type="ColorRect" parent="BackgroundLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+material = SubResource("ShaderMaterial_bgpattern")
 
 [node name="Player" parent="." unique_id=53324152 instance=ExtResource("1_ebmjs")]
 position = Vector2(582, 327)
