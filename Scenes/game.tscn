@@ -21,6 +21,27 @@ offset_bottom = 50.0
 text = "Time: --"
 theme_override_font_sizes/font_size = 24
 
+[node name="GoalStatusLabel" type="Label" parent="UI"]
+offset_left = 20.0
+offset_top = 56.0
+offset_right = 260.0
+offset_bottom = 86.0
+text = "Finish Area: OUT"
+theme_override_font_sizes/font_size = 20
+
+[node name="GoalArea" type="Node2D" parent="."]
+position = Vector2(720, 200)
+
+[node name="GoalFill" type="Polygon2D" parent="GoalArea"]
+color = Color(0.3, 0.8, 0.3, 0.32)
+polygon = PackedVector2Array(0, -50, 24, -44, 44, -24, 50, 0, 44, 24, 24, 44, 0, 50, -24, 44, -44, 24, -50, 0, -44, -24, -24, -44)
+
+[node name="GoalOutline" type="Line2D" parent="GoalArea"]
+points = PackedVector2Array(0, -50, 24, -44, 44, -24, 50, 0, 44, 24, 24, 44, 0, 50, -24, 44, -44, 24, -50, 0, -44, -24, -24, -44, 0, -50)
+width = 4.0
+default_color = Color(0.22, 0.6, 0.22, 0.95)
+antialiased = true
+
 [node name="BackgroundLayer" type="CanvasLayer" parent="."]
 layer = -10
 

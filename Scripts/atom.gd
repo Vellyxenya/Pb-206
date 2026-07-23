@@ -2,6 +2,8 @@ extends RigidBody2D
 
 const NucleusScene = preload("res://Scenes/nucleus.tscn")
 
+signal phase_timer_finished
+
 @export var isotope_key: String = "U-238"
 @export var acceleration_force: float = 2600.0
 @export var movement_damping: float = 1.1
@@ -51,6 +53,10 @@ func tick_phase_timer(delta: float) -> void:
 
 func on_phase_timer_finished() -> void:
 	print("Phase timer finished for ", isotope_name)
+	phase_timer_finished.emit()
+
+func on_phase_completed() -> void:
+	print("Phase completed successfully for ", isotope_name)
 
 func get_phase_time_left() -> float:
 	return phase_time_left

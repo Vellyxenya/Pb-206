@@ -2,7 +2,6 @@ shader_type canvas_item;
 
 uniform vec2 world_offset = vec2(0.0, 0.0);
 uniform float pattern_scale = 42.0;
-uniform float parallax_strength = 0.06;
 uniform vec4 base_color : source_color = vec4(0.86, 0.94, 1.0, 1.0);
 uniform vec4 line_color : source_color = vec4(0.74, 0.85, 0.97, 1.0);
 uniform vec4 dot_color : source_color = vec4(0.70, 0.81, 0.93, 1.0);
@@ -10,7 +9,9 @@ uniform float line_thickness = 0.020;
 uniform float dot_radius = 0.060;
 
 void fragment() {
-	vec2 uv = SCREEN_UV * pattern_scale + world_offset * parallax_strength;
+	vec2 viewport_size = 1.0 / SCREEN_PIXEL_SIZE;
+	vec2 world_pixels = SCREEN_UV * viewport_size + world_offset;
+	vec2 uv = world_pixels / pattern_scale;
 	vec2 cell_index = floor(uv);
 	vec2 cell_uv = fract(uv) - 0.5;
 	vec2 grid = abs(cell_uv);
