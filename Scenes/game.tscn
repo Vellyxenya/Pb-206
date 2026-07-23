@@ -1,45 +1,119 @@
 [gd_scene format=3 uid="uid://cuvru8fjpuk0n"]
 
-[ext_resource type="PackedScene" path="res://Scenes/player.tscn" id="1_ebmjs"]
-[ext_resource type="Script" path="res://Scripts/game.gd" id="2_gamescript"]
-[ext_resource type="Script" path="res://Scripts/world_background.gd" id="3_backgroundscript"]
+[ext_resource type="PackedScene" uid="uid://mttryj5fq7wk" path="res://Scenes/player.tscn" id="1_ebmjs"]
+[ext_resource type="Script" uid="uid://1n227odevv75" path="res://Scripts/game.gd" id="2_gamescript"]
+[ext_resource type="Script" uid="uid://bbw1t7mpty6we" path="res://Scripts/world_background.gd" id="3_backgroundscript"]
 
 [node name="Game" type="Node2D" unique_id=1236288522]
 script = ExtResource("2_gamescript")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=598616309]
 layer = 10
 
-[node name="PhaseTimerLabel" type="Label" parent="UI"]
+[node name="PhaseTimerLabel" type="Label" parent="UI" unique_id=914935188]
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 200.0
 offset_bottom = 50.0
-text = "Time: --"
 theme_override_font_sizes/font_size = 24
+text = "Time: --"
 
-[node name="GoalStatusLabel" type="Label" parent="UI"]
+[node name="GoalStatusLabel" type="Label" parent="UI" unique_id=773423086]
 offset_left = 20.0
 offset_top = 56.0
 offset_right = 260.0
 offset_bottom = 86.0
-text = "Finish Area: OUT. Hurry to the area before the timer runs out!"
 theme_override_font_sizes/font_size = 20
+text = "Finish Area: OUT. Hurry to the area before the timer runs out!"
 
-[node name="GoalArea" type="Node2D" parent="."]
+[node name="TransitionFlash" type="ColorRect" parent="UI" unique_id=948063964]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="GameOverOverlay" type="ColorRect" parent="UI" unique_id=101614607]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0.05, 0.05, 0.08, 0.78)
+
+[node name="GameOverPanel" type="Panel" parent="UI/GameOverOverlay" unique_id=1695915013]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -362.5
+offset_top = -120.0
+offset_right = 362.5
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GameOverContent" type="VBoxContainer" parent="UI/GameOverOverlay/GameOverPanel" unique_id=497896486]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -223.5
+offset_top = -72.5
+offset_right = 223.5
+offset_bottom = 72.5
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="GameOverTitle" type="Label" parent="UI/GameOverOverlay/GameOverPanel/GameOverContent" unique_id=931150871]
+custom_minimum_size = Vector2(340, 68)
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "GAME OVER
+Timer expired outside finish area"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ButtonRow" type="HBoxContainer" parent="UI/GameOverOverlay/GameOverPanel/GameOverContent" unique_id=270385892]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="RestartButton" type="Button" parent="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow" unique_id=1226774070]
+custom_minimum_size = Vector2(140, 44)
+layout_mode = 2
+text = "Restart"
+
+[node name="MainMenuButton" type="Button" parent="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow" unique_id=1729583553]
+custom_minimum_size = Vector2(140, 44)
+layout_mode = 2
+text = "Main Menu"
+
+[node name="GoalArea" type="Node2D" parent="." unique_id=820211187]
 position = Vector2(720, 200)
 
-[node name="GoalFill" type="Polygon2D" parent="GoalArea"]
+[node name="GoalFill" type="Polygon2D" parent="GoalArea" unique_id=1778625098]
 color = Color(0.3, 0.8, 0.3, 0.32)
 polygon = PackedVector2Array(0, -50, 24, -44, 44, -24, 50, 0, 44, 24, 24, 44, 0, 50, -24, 44, -44, 24, -50, 0, -44, -24, -24, -44)
 
-[node name="GoalOutline" type="Line2D" parent="GoalArea"]
+[node name="GoalOutline" type="Line2D" parent="GoalArea" unique_id=1162397289]
 points = PackedVector2Array(0, -50, 24, -44, 44, -24, 50, 0, 44, 24, 24, 44, 0, 50, -24, 44, -44, 24, -50, 0, -44, -24, -24, -44, 0, -50)
 width = 4.0
 default_color = Color(0.22, 0.6, 0.22, 0.95)
 antialiased = true
 
-[node name="Background" type="Node2D" parent="."]
+[node name="Background" type="Node2D" parent="." unique_id=1970185643]
 z_index = -10
 script = ExtResource("3_backgroundscript")
 

@@ -14,8 +14,11 @@ var oscillation_speed: Vector2
 var oscillation_amplitude := 3.0  # pixels
 var time_offset: float
 var proton_tint: Color = Color(0.95, 0.25, 0.25)
+var is_destroying: bool = false
 
 func _ready():
+	add_to_group("nucleus_visual")
+
 	# Ensure sprite is centered (pivot at center, not top-left)
 	sprite.centered = true
 
@@ -48,10 +51,34 @@ func _process(delta):
 	sprite.position = oscillation_offset
 
 func _on_spawn_finished():
+	if is_destroying:
+		return
+
 	if nucleus_type == NucleusType.PROTON:
 		sprite.play("proton")
 	else:
 		sprite.play("neutron")
+
+func play_destroy_animation() -> void:
+	if sprite == null:
+		return
+
+	is_destroying = true
+	oscillation_amplitude = 0.0
+	if sprite.sprite_frames != null and sprite.sprite_frames.has_animation("destroy"):
+		sprite.play("destroy")
+	else:
+		sprite.visible = false
+
+func get_destroy_duration() -> float:
+	if sprite == null or sprite.sprite_frames == null:
+		return 0.35
+	if not sprite.sprite_frames.has_animation("destroy"):
+		return 0.35
+
+	var frame_count = sprite.sprite_frames.get_frame_count("destroy")
+	var speed = max(sprite.sprite_frames.get_animation_speed("destroy"), 1.0)
+	return float(frame_count) / speed
 
 func set_type(type: NucleusType, tint: Color = Color(0.95, 0.25, 0.25)):
 	nucleus_type = type

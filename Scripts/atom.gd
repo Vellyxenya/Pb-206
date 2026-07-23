@@ -41,6 +41,14 @@ func _input(event: InputEvent) -> void:
 		phase_time_left = max(0.0, phase_time_left - 10.0)
 		print("DEBUG: Timer reduced by 10s. Remaining: ", snapped(phase_time_left, 0.1), "s")
 
+func teleport_towards(world_target: Vector2, distance: float) -> void:
+	var to_target = world_target - global_position
+	if to_target.length_squared() <= 0.0001:
+		return
+
+	global_position += to_target.normalized() * distance
+	linear_velocity = Vector2.ZERO
+
 func tick_phase_timer(delta: float) -> void:
 	if not phase_active:
 		return
@@ -57,6 +65,24 @@ func on_phase_timer_finished() -> void:
 
 func on_phase_completed() -> void:
 	print("Phase completed successfully for ", isotope_name)
+
+func play_destroy_animation() -> void:
+	var nuclei = _get_nucleus_nodes()
+	if nuclei.is_empty():
+		return
+
+	var destroy_duration := 0.35
+	for nucleus in nuclei:
+		if nucleus.has_method("play_destroy_animation"):
+			nucleus.play_destroy_animation()
+		if nucleus.has_method("get_destroy_duration"):
+			destroy_duration = max(destroy_duration, float(nucleus.get_destroy_duration()))
+
+	await get_tree().create_timer(destroy_duration).timeout
+
+func reset_phase_visuals() -> void:
+	_clear_nucleus_nodes()
+	spawn_nuclei()
 
 func get_phase_time_left() -> float:
 	return phase_time_left
@@ -77,6 +103,7 @@ func load_isotope_data():
 	mass_number = data.mass_number
 	disk_radius = data.disk_radius
 	proton_tint = IsotopeData.get_proton_tint(isotope_key)
+	mass = max(1.0, float(mass_number - 200))
 	
 	var timer_range = data.timer_range
 	phase_time_total = randf_range(float(timer_range[0]), float(timer_range[1]))
@@ -85,6 +112,17 @@ func load_isotope_data():
 	
 	print("Loaded isotope: ", isotope_name, " (", mass_number, ")")
 	print("Phase timer started: ", snapped(phase_time_left, 0.1), "s")
+
+func _get_nucleus_nodes() -> Array[Node]:
+	var nuclei: Array[Node] = []
+	for child in get_children():
+		if child.is_in_group("nucleus_visual"):
+			nuclei.append(child)
+	return nuclei
+
+func _clear_nucleus_nodes() -> void:
+	for nucleus in _get_nucleus_nodes():
+		nucleus.free()
 
 func spawn_nuclei():
 	var proton_count = IsotopeData.get_proton_count(isotope_key)

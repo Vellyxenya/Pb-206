@@ -59,6 +59,22 @@ region = Rect2(384, 0, 128, 128)
 atlas = ExtResource("1_gyxa0")
 region = Rect2(0, 128, 128, 128)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_destroy_1"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(0, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_destroy_2"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(128, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_destroy_3"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(256, 384, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_destroy_4"]
+atlas = ExtResource("1_gyxa0")
+region = Rect2(384, 384, 128, 128)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_sfggm"]
 animations = [{
 "frames": [{
@@ -114,6 +130,23 @@ animations = [{
 "loop": false,
 "name": &"spawn",
 "speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_destroy_1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_destroy_2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_destroy_3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_destroy_4")
+}],
+"loop": false,
+"name": &"destroy",
+"speed": 12.0
 }]
 
 [node name="Nucleus" type="Node2D" unique_id=2070315211]
