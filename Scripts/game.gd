@@ -1,14 +1,14 @@
 extends Node2D
 
-@export var goal_position: Vector2 = Vector2(720.0, 200.0)
-@export var goal_radius: float = 300.0
+@export var goal_position: Vector2 = Vector2(2720.0, 1900.0)
+@export var goal_radius: float = 1200.0
 @export var goal_arrow_padding: float = 42.0
 
-const GOAL_VISUAL_SEGMENTS: int = 24
+const GOAL_VISUAL_SEGMENTS: int = 64
 
 @onready var atom: RigidBody2D = $Player/Atom
 @onready var camera: Camera2D = $Player/Atom/Camera2D
-@onready var background_material: ShaderMaterial = $BackgroundLayer/Background.material as ShaderMaterial
+@onready var background: Node2D = $Background
 @onready var timer_label: Label = $UI/PhaseTimerLabel
 @onready var goal_status_label: Label = $UI/GoalStatusLabel
 @onready var goal_area: Node2D = $GoalArea
@@ -27,11 +27,11 @@ func _ready() -> void:
 	_update_goal_guidance(false)
 
 func _process(_delta):
-	if background_material != null:
+	if background != null:
 		var background_anchor = atom.global_position if atom != null else Vector2.ZERO
 		if camera != null:
 			background_anchor = camera.global_position
-		background_material.set_shader_parameter("world_offset", background_anchor)
+		background.set_view_center(background_anchor)
 
 	if atom != null and timer_label != null and atom.has_method("get_phase_time_left"):
 		timer_label.text = "Time: " + str(snapped(atom.get_phase_time_left(), 0.1))
@@ -84,7 +84,7 @@ func _update_goal_status(in_finish_area: bool) -> void:
 	if goal_status_label == null:
 		return
 
-	goal_status_label.text = "Finish Area: IN" if in_finish_area else "Finish Area: OUT"
+	goal_status_label.text = "Finish Area: IN" if in_finish_area else "Finish Area: OUT.\nHurry to the area before the timer runs out!"
 	goal_status_label.modulate = Color(0.18, 0.62, 0.22) if in_finish_area else Color(0.82, 0.2, 0.2)
 
 func _update_goal_guidance(in_finish_area: bool) -> void:

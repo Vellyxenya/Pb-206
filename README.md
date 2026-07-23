@@ -76,8 +76,8 @@ This project uses a **milestone-based approach** with clear verification at each
 - [x] **M1:** Atom with Nucleus Sprites ✓ **COMPLETE**
 - [x] **M2:** Mouse Following Movement ✓ **COMPLETE**
 - [x] **M3:** Mass-Based Movement (Data-Driven) ✓ **COMPLETE**
-- [ ] **M4:** Phase Timer System ← **YOU ARE HERE**
-- [ ] **M5:** Goal Area System
+- [x] **M4:** Phase Timer System ✓ **COMPLETE**
+- [ ] **M5:** Goal Area System ← **YOU ARE HERE**
 - [ ] **M6:** Win/Lose Conditions
 - [ ] **M7:** Basic Hazards (Neutron Fields)
 - [ ] **M8:** Containment Walls

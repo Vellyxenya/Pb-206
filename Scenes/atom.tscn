@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://cxqbtqjhdqt4k"]
 
 [ext_resource type="Script" uid="uid://k32p6gycnyrv" path="res://Scripts/atom.gd" id="1_cdecr"]
-[ext_resource type="Texture2D" path="res://Assets/arrow_pb.png" id="2_arrow"]
+[ext_resource type="Texture2D" uid="uid://bch7om8kf1s08" path="res://Assets/arrow_pb.png" id="2_arrow"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_cdecr"]
-radius = 79.07591
+radius = 32.01562
 
 [node name="Atom" type="RigidBody2D" unique_id=942030519]
 gravity_scale = 0.0
@@ -28,5 +28,5 @@ offset_left = -30.0
 offset_top = -160.0
 offset_right = 70.0
 offset_bottom = -134.0
-horizontal_alignment = 1
 theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
