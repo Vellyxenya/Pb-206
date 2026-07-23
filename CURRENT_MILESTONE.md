@@ -1,116 +1,145 @@
-# Current Milestone: M2 - Mouse Following Movement
+# Current Milestone: M4 - Phase Timer System
 
 ## Goal
-Make the atom follow the mouse cursor using physics-based movement with inertia.
+Add a per-phase countdown timer driven by isotope data.
 
 ## Why This Matters
-Movement is the core gameplay loop. In this milestone, the atom becomes controllable while preserving your nucleus visuals, tinting, hex layout, and subtle nucleus motion.
+The decay timer is a core rule of the game loop. Each isotope phase must run on a timer before transitioning.
 
 ## Prerequisites
-- M1 complete
-- `Scenes/atom.tscn` exists
-- `Scripts/atom.gd` exists
-- Atom visuals already spawn correctly (mixed proton/neutron, shader tinting, concentric hex layout)
+- M2 complete (movement working)
+- M3 complete (data-driven isotope loading working)
+- `Data/IsotopeData.gd` contains `timer_range` per isotope
 
 ---
 
 ## Step-by-Step Instructions
 
-### Step 1: Open Atom Scene
-1. Open `Scenes/atom.tscn`.
-2. Select the root node `Atom` in the Scene panel.
+### Step 1: Add Timer State to Atom Script
+Open `Scripts/atom.gd` and add these variables near your other fields:
 
-### Step 2: Change Atom Root to RigidBody2D
-1. Right-click `Atom`.
-2. Click **Change Type**.
-3. Search and select **RigidBody2D**.
+```gdscript
+var phase_time_total: float = 0.0
+var phase_time_left: float = 0.0
+var phase_active: bool = false
+```
 
-### Step 3: Configure RigidBody2D Properties
-With `Atom` selected in Inspector:
-1. Set **Gravity Scale** to `0`.
-2. Enable **Lock Rotation**.
-3. Keep default damping values for now.
+### Step 2: Sample Timer From Isotope Data
+In `load_isotope_data()`, after loading isotope values, sample the timer range:
 
-### Step 4: Add Collision Shape
-1. Select `Atom`.
-2. Add child node: **CollisionShape2D**.
-3. In Inspector, assign **CircleShape2D** to `shape`.
-4. Set radius so it roughly covers the full nucleus cluster.
-   - Good start: radius `110` to `140` depending on your `HEX_RADIUS`.
+```gdscript
+var timer_range = data.timer_range
+phase_time_total = randf_range(float(timer_range[0]), float(timer_range[1]))
+phase_time_left = phase_time_total
+phase_active = true
+print("Phase timer started: ", snapped(phase_time_left, 0.1), "s")
+```
 
-### Step 5: Update Atom Script Base Class
-In `Scripts/atom.gd`:
-1. Change `extends Node2D` to `extends RigidBody2D`.
-2. Add export for movement force:
-   - `@export var acceleration_force: float = 1400.0`
+### Step 3: Add Countdown Tick
+In `Scripts/atom.gd`, add this function:
 
-### Step 6: Add Mouse-Follow Physics
+```gdscript
+func tick_phase_timer(delta: float) -> void:
+if not phase_active:
+return
+
+phase_time_left -= delta
+if phase_time_left <= 0.0:
+phase_time_left = 0.0
+phase_active = false
+on_phase_timer_finished()
+```
+
+### Step 4: Hook Timer Tick Into Physics Loop
+At the top of `drive_towards(world_target: Vector2)`, add:
+
+```gdscript
+tick_phase_timer(get_physics_process_delta_time())
+```
+
+This keeps timer updates tied to gameplay update cadence.
+
+### Step 5: Add Finish Handler
 In `Scripts/atom.gd`, add:
-1. A `_physics_process(_delta)` function.
-2. Read mouse world position with `get_global_mouse_position()`.
-3. Compute direction from atom to mouse.
-4. Apply central force in that direction.
-
-Use this code block exactly:
 
 ```gdscript
-func _physics_process(_delta):
-var mouse_pos = get_global_mouse_position()
-var to_mouse = mouse_pos - global_position
-if to_mouse.length_squared() > 1.0:
-apply_central_force(to_mouse.normalized() * acceleration_force)
+func on_phase_timer_finished() -> void:
+print("Phase timer finished for ", isotope_name)
+# Transition logic will be added in M10.
 ```
 
-### Step 7: Set Physics Mass from Isotope
-In `_ready()` after loading isotope data, set the body mass:
+### Step 6: Expose Read Helpers
+Add read-only helpers for UI and game systems:
 
 ```gdscript
-mass = max(1.0, float(mass_number - 200))
+func get_phase_time_left() -> float:
+return phase_time_left
+
+func get_phase_time_total() -> float:
+return phase_time_total
+
+func is_phase_active() -> bool:
+return phase_active
 ```
 
-This preserves your mass-scaling rule and makes heavy isotopes feel slower.
+### Step 7: Add a Simple On-Screen Timer Label
+Open `Scenes/game.tscn` and add:
+1. Child node of `Game`: `CanvasLayer` named `UI`
+2. Child node of `UI`: `Label` named `PhaseTimerLabel`
+3. In Inspector for `PhaseTimerLabel`, set:
+   - Position: `(20, 20)`
+   - Text: `Time: --`
 
-### Step 8: Verify Scene Wiring
-1. Ensure `Scenes/game.tscn` still instances `atom.tscn`.
-2. Ensure `game.tscn` is still the main scene in Project Settings > Run.
+### Step 8: Update Game Script for Timer UI
+Open `Scripts/game.gd` and add:
+1. Onready reference to label
+2. Per-frame update from atom timer
+
+Use this logic:
+
+```gdscript
+@onready var timer_label: Label = $UI/PhaseTimerLabel
+
+func _process(_delta):
+if atom != null and background_material != null:
+background_material.set_shader_parameter("world_offset", atom.global_position)
+
+if atom != null and timer_label != null and atom.has_method("get_phase_time_left"):
+timer_label.text = "Time: " + str(snapped(atom.get_phase_time_left(), 0.1))
+```
 
 ### Step 9: Run and Validate
 1. Press F5.
-2. Move mouse around.
-3. Confirm:
-   - Atom accelerates toward cursor.
-   - Movement has inertia (drift/momentum).
-   - Atom does not spin.
-   - Nucleus visuals remain intact while moving.
+2. Confirm timer appears top-left.
+3. Confirm value counts down every frame.
+4. Confirm finish print appears in output at zero.
 
 ---
 
 ## Verification Checklist
 
-- [ ] `Atom` root is `RigidBody2D`
-- [ ] Gravity Scale is `0`
-- [ ] Lock Rotation is enabled
-- [ ] `CollisionShape2D` exists with `CircleShape2D`
-- [ ] `atom.gd` extends `RigidBody2D`
-- [ ] `_physics_process` applies force toward mouse
-- [ ] `mass` is set from `(mass_number - 200)`
-- [ ] Atom follows cursor with inertia
-- [ ] Nucleus visuals still render correctly while moving
+- [ ] Atom stores `phase_time_total`, `phase_time_left`, and `phase_active`
+- [ ] Timer is sampled from isotope `timer_range`
+- [ ] Timer counts down during gameplay
+- [ ] Timer clamps to 0 at finish
+- [ ] `on_phase_timer_finished()` triggers once
+- [ ] UI label shows live remaining time
+- [ ] No script/runtime errors
 
 ---
 
 ## Expected Result
 
 When running the game:
-- The atom follows the cursor using force-based movement.
-- Heavy isotopes feel slower due to higher mass.
-- The atom remains visually stable: mixed proton/neutron tinting, concentric layout, and subtle nucleus motion.
+- The atom phase starts with a random timer from isotope data.
+- Countdown is visible and updates live.
+- At zero, phase ends and finish event fires.
 
 ---
 
 ## Next Step
 
-When this checklist is fully done, reply with:
-**M2 Complete!**
+When all checklist items are done, reply with:
+**M4 Complete!**
 
-Then we move to M3 and formalize full data-driven isotope switching/tuning.
+Then we move to M5 (Goal Area System).
