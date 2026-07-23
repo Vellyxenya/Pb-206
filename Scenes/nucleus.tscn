@@ -1,7 +1,11 @@
 [gd_scene format=3 uid="uid://bywul5wkrxeqd"]
 
 [ext_resource type="Texture2D" uid="uid://c13mcx4a0ulqm" path="res://Assets/nucleus_spritesheet.png" id="1_gyxa0"]
-[ext_resource type="Script" path="res://Scripts/nucleus.gd" id="1_vt7ja"]
+[ext_resource type="Script" uid="uid://bdr6u8l51e0uh" path="res://Scripts/nucleus.gd" id="1_vt7ja"]
+[ext_resource type="Shader" uid="uid://cuox26u1kthio" path="res://Assets/Shaders/NucleusTint.gdshader" id="2_lkh8b"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_47j3p"]
+shader = ExtResource("2_lkh8b")
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_7fq3c"]
 atlas = ExtResource("1_gyxa0")
@@ -116,6 +120,7 @@ animations = [{
 script = ExtResource("1_vt7ja")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1916345401]
+material = SubResource("ShaderMaterial_47j3p")
 sprite_frames = SubResource("SpriteFrames_sfggm")
 animation = &"neutron"
 autoplay = "spawn"

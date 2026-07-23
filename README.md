@@ -66,15 +66,15 @@ This project uses a **milestone-based approach** with clear verification at each
 
 ## 📊 Current Progress
 
-**Active Milestone:** M1 - Atom with Nucleus Sprites  
-**Completed Milestones:** M0 ✓  
-**Next Up:** M2 - Mouse Following Movement
+**Active Milestone:** M2 - Mouse Following Movement  
+**Completed Milestones:** M0 ✓, M1 ✓  
+**Next Up:** M3 - Mass-Based Movement (Data-Driven)
 
 ### Milestone Overview:
 
 - [x] **M0:** Project Setup ✓ **COMPLETE**
-- [ ] **M1:** Atom with Nucleus Sprites ← **YOU ARE HERE**
-- [ ] **M2:** Mouse Following Movement
+- [x] **M1:** Atom with Nucleus Sprites ✓ **COMPLETE**
+- [ ] **M2:** Mouse Following Movement ← **YOU ARE HERE**
 - [ ] **M3:** Mass-Based Movement (Data-Driven)
 - [ ] **M4:** Phase Timer System
 - [ ] **M5:** Goal Area System
@@ -93,9 +93,9 @@ This project uses a **milestone-based approach** with clear verification at each
 
 **Right now:**
 1. Open `CURRENT_MILESTONE.md`
-2. Follow the M0 (Project Setup) instructions
-3. When complete, tell me "M0 Complete!"
-4. I'll update everything for M1
+2. Follow the M2 (Mouse Following Movement) instructions
+3. When complete, tell me "M2 Complete!"
+4. I'll advance everything to M3
 
 **Need help first?**
 - Open `GODOT_UI_GUIDE.md` to familiarize yourself with Godot

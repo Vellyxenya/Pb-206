@@ -11,7 +11,8 @@ var isotopes = {
 		"next_isotope": "Th-234",
 		"timer_range": [120, 180],  # 2-3 minutes
 		"disk_radius": 70.0,
-		"sprite_color": Color(0.2, 0.8, 0.3)  # green
+		"sprite_color": Color(0.2, 0.8, 0.3),  # green
+		"proton_tint": Color(0.95, 0.25, 0.25)  # red
 	},
 	"Th-234": {
 		"name": "Thorium-234",
@@ -22,7 +23,8 @@ var isotopes = {
 		"next_isotope": "Pa-234",
 		"timer_range": [90, 150],
 		"disk_radius": 68.0,
-		"sprite_color": Color(0.9, 0.5, 0.2)  # orange
+		"sprite_color": Color(0.9, 0.5, 0.2),  # orange
+		"proton_tint": Color(1.0, 0.45, 0.2)  # orange-red
 	},
 	"Pa-234": {
 		"name": "Protactinium-234",
@@ -33,7 +35,8 @@ var isotopes = {
 		"next_isotope": "U-234",
 		"timer_range": [60, 120],
 		"disk_radius": 68.0,
-		"sprite_color": Color(0.8, 0.3, 0.8)  # purple
+		"sprite_color": Color(0.8, 0.3, 0.8),  # purple
+		"proton_tint": Color(0.95, 0.35, 0.8)  # magenta
 	},
 	"Pb-206": {
 		"name": "Lead-206",
@@ -44,7 +47,8 @@ var isotopes = {
 		"next_isotope": null,
 		"timer_range": [0, 0],
 		"disk_radius": 50.0,
-		"sprite_color": Color(0.6, 0.6, 0.7)  # silver/lead
+		"sprite_color": Color(0.6, 0.6, 0.7),  # silver/lead
+		"proton_tint": Color(0.8, 0.55, 0.35)  # warm brown
 	}
 	# TODO: Add remaining 10 isotopes in later milestones
 }
@@ -77,3 +81,10 @@ func get_neutron_count(isotope_key: String) -> int:
 	if data.is_empty():
 		return 0
 	return data.neutrons
+
+# Get proton fill tint color for an isotope
+func get_proton_tint(isotope_key: String) -> Color:
+	var data = get_isotope(isotope_key)
+	if data.is_empty() or not data.has("proton_tint"):
+		return Color(0.95, 0.25, 0.25)
+	return data.proton_tint

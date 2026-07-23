@@ -2,6 +2,8 @@ extends Node2D
 
 enum NucleusType { PROTON, NEUTRON }
 
+const NUCLEUS_TINT_SHADER = preload("res://Assets/Shaders/NucleusTint.gdshader")
+
 @export var nucleus_type: NucleusType = NucleusType.PROTON
 
 @onready var sprite: AnimatedSprite2D = $AnimatedSprite2D
@@ -11,10 +13,17 @@ var oscillation_offset: Vector2 = Vector2.ZERO
 var oscillation_speed: Vector2
 var oscillation_amplitude := 3.0  # pixels
 var time_offset: float
+var proton_tint: Color = Color(0.95, 0.25, 0.25)
 
 func _ready():
 	# Ensure sprite is centered (pivot at center, not top-left)
 	sprite.centered = true
+
+	# Give each nucleus its own shader material so per-instance tint can vary.
+	var tint_material := ShaderMaterial.new()
+	tint_material.shader = NUCLEUS_TINT_SHADER
+	sprite.material = tint_material
+	_apply_tint_state()
 	
 	# Random oscillation parameters for each nucleus
 	oscillation_speed = Vector2(
@@ -44,5 +53,15 @@ func _on_spawn_finished():
 	else:
 		sprite.play("neutron")
 
-func set_type(type: NucleusType):
+func set_type(type: NucleusType, tint: Color = Color(0.95, 0.25, 0.25)):
 	nucleus_type = type
+	proton_tint = tint
+	if is_inside_tree():
+		_apply_tint_state()
+
+func _apply_tint_state():
+	var tint_material := sprite.material as ShaderMaterial
+	if tint_material == null:
+		return
+	tint_material.set_shader_parameter("is_proton", nucleus_type == NucleusType.PROTON)
+	tint_material.set_shader_parameter("proton_tint", proton_tint)
