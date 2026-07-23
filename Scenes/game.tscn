@@ -10,6 +10,17 @@ shader = ExtResource("3_bgshader")
 [node name="Game" type="Node2D" unique_id=1236288522]
 script = ExtResource("2_gamescript")
 
+[node name="UI" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="PhaseTimerLabel" type="Label" parent="UI"]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 200.0
+offset_bottom = 50.0
+text = "Time: --"
+theme_override_font_sizes/font_size = 24
+
 [node name="BackgroundLayer" type="CanvasLayer" parent="."]
 layer = -10
 

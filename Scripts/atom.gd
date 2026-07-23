@@ -5,13 +5,17 @@ const NucleusScene = preload("res://Scenes/nucleus.tscn")
 @export var isotope_key: String = "U-238"
 @export var acceleration_force: float = 2600.0
 @export var movement_damping: float = 1.1
-@export var mouse_deadzone: float = 2.0
+@export var mouse_deadzone: float = 12.0
 @export var collider_padding: float = 18.0
 
 var mass_number: int
 var disk_radius: float
 var isotope_name: String
 var proton_tint: Color = Color(0.95, 0.25, 0.25)
+
+var phase_time_total: float = 0.0
+var phase_time_left: float = 0.0
+var phase_active: bool = false
 
 func _ready():
 	gravity_scale = 0.0
@@ -23,9 +27,39 @@ func _ready():
 	spawn_nuclei()
 
 func drive_towards(world_target: Vector2) -> void:
+	tick_phase_timer(get_physics_process_delta_time())
+	
 	var to_target = world_target - global_position
 	if to_target.length_squared() > mouse_deadzone * mouse_deadzone:
 		apply_central_force(to_target.normalized() * acceleration_force)
+
+func _input(event: InputEvent) -> void:
+	# DEBUG: Press 'T' to reduce timer by 10 seconds for quick testing
+	if event is InputEventKey and event.pressed and event.keycode == KEY_T:
+		phase_time_left = max(0.0, phase_time_left - 10.0)
+		print("DEBUG: Timer reduced by 10s. Remaining: ", snapped(phase_time_left, 0.1), "s")
+
+func tick_phase_timer(delta: float) -> void:
+	if not phase_active:
+		return
+
+	phase_time_left -= delta
+	if phase_time_left <= 0.0:
+		phase_time_left = 0.0
+		phase_active = false
+		on_phase_timer_finished()
+
+func on_phase_timer_finished() -> void:
+	print("Phase timer finished for ", isotope_name)
+
+func get_phase_time_left() -> float:
+	return phase_time_left
+
+func get_phase_time_total() -> float:
+	return phase_time_total
+
+func is_phase_active() -> bool:
+	return phase_active
 
 func load_isotope_data():
 	var data = IsotopeData.get_isotope(isotope_key)
@@ -38,7 +72,13 @@ func load_isotope_data():
 	disk_radius = data.disk_radius
 	proton_tint = IsotopeData.get_proton_tint(isotope_key)
 	
+	var timer_range = data.timer_range
+	phase_time_total = randf_range(float(timer_range[0]), float(timer_range[1]))
+	phase_time_left = phase_time_total
+	phase_active = true
+	
 	print("Loaded isotope: ", isotope_name, " (", mass_number, ")")
+	print("Phase timer started: ", snapped(phase_time_left, 0.1), "s")
 
 func spawn_nuclei():
 	var proton_count = IsotopeData.get_proton_count(isotope_key)
