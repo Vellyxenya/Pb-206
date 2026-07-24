@@ -9,5 +9,6 @@ script = ExtResource("1_0q8th")
 [node name="Atom" parent="." unique_id=1907918391 instance=ExtResource("2_ehw5f")]
 
 [node name="Camera2D" type="Camera2D" parent="Atom" unique_id=129836498]
+zoom = Vector2(0.6, 0.6)
 position_smoothing_enabled = true
 position_smoothing_speed = 6.0

@@ -6,5 +6,7 @@ func _physics_process(_delta):
 	var overlapping_bodies = get_overlapping_bodies()
 	for body in overlapping_bodies:
 		if body.is_in_group("player"):
-			var direction_towards = body.global_position.direction_to(global_position)
-			body.apply_external_force(direction_towards * attraction_strength)
+			# Only affect charged atoms (positive charge is attracted to electron field)
+			if body.has_method("get_charge") and body.get_charge() > 0:
+				var direction_towards = body.global_position.direction_to(global_position)
+				body.apply_external_force(direction_towards * attraction_strength)

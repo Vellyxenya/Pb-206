@@ -3,8 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://mttryj5fq7wk" path="res://Scenes/player.tscn" id="1_ebmjs"]
 [ext_resource type="Script" uid="uid://1n227odevv75" path="res://Scripts/game.gd" id="2_gamescript"]
 [ext_resource type="Script" uid="uid://bbw1t7mpty6we" path="res://Scripts/world_background.gd" id="3_backgroundscript"]
-[ext_resource type="PackedScene" path="res://Scenes/ProtonField.tscn" id="4_wowpa"]
-[ext_resource type="PackedScene" path="res://Scenes/ElectronField.tscn" id="5_i6g32"]
+[ext_resource type="PackedScene" uid="uid://c6w7d5q1dqo1t" path="res://Scenes/ProtonField.tscn" id="4_wowpa"]
+[ext_resource type="PackedScene" uid="uid://b5yqjgm1q1w8t" path="res://Scenes/ElectronField.tscn" id="5_i6g32"]
 
 [node name="Game" type="Node2D" unique_id=1236288522]
 script = ExtResource("2_gamescript")
@@ -20,11 +20,24 @@ offset_bottom = 50.0
 theme_override_font_sizes/font_size = 24
 text = "Time: --"
 
+[node name="ScoreLabel" type="Label" parent="UI"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -100.0
+offset_top = 20.0
+offset_right = 100.0
+offset_bottom = 54.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 28
+text = "Score: 0"
+horizontal_alignment = 1
+
 [node name="GoalStatusLabel" type="Label" parent="UI" unique_id=773423086]
-offset_left = 20.0
-offset_top = 56.0
-offset_right = 260.0
-offset_bottom = 86.0
+offset_left = 10.0
+offset_top = 826.0
+offset_right = 604.0
+offset_bottom = 856.0
 theme_override_font_sizes/font_size = 20
 text = "Finish Area: OUT. Hurry to the area before the timer runs out!"
 
@@ -128,6 +141,8 @@ antialiased = true
 
 [node name="Hazards" type="Node2D" parent="." unique_id=2085012273]
 
+[node name="Collectibles" type="Node2D" parent="."]
+
 [node name="Background" type="Node2D" parent="." unique_id=1970185643]
 z_index = -10
 script = ExtResource("3_backgroundscript")
@@ -136,7 +151,7 @@ script = ExtResource("3_backgroundscript")
 position = Vector2(582, 327)
 
 [node name="ProtonField" parent="." unique_id=724895887 instance=ExtResource("4_wowpa")]
-position = Vector2(256, 760)
+position = Vector2(316, 728)
 
 [node name="ElectronField" parent="." unique_id=584002437 instance=ExtResource("5_i6g32")]
-position = Vector2(189, -139)
+position = Vector2(429, -208)

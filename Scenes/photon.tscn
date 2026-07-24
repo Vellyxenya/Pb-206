@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://bqw7x3mh8rgkp"]
+
+[ext_resource type="Script" path="res://Scripts/photon.gd" id="1_photon"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_photon"]
+radius = 12.0
+
+[sub_resource type="Gradient" id="Gradient_photon"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(1, 1, 0.8, 1, 1, 0.95, 0.6, 1, 1, 0.85, 0.3, 0.8)
+
+[node name="Photon" type="Area2D" groups=["collectibles"]]
+collision_layer = 8
+collision_mask = 1
+monitoring = true
+monitorable = true
+script = ExtResource("1_photon")
+point_value = 5
+move_speed = 80.0
+oscillation_amplitude = 25.0
+oscillation_frequency = 3.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_photon")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="CoreGlow" type="Polygon2D" parent="Visual"]
+color = Color(1, 1, 0.9, 0.8)
+polygon = PackedVector2Array(-8, 0, 0, -8, 8, 0, 0, 8)
+
+[node name="InnerRing" type="Polygon2D" parent="Visual"]
+color = Color(1, 0.95, 0.7, 0.6)
+polygon = PackedVector2Array(-12, 0, -8.5, -8.5, 0, -12, 8.5, -8.5, 12, 0, 8.5, 8.5, 0, 12, -8.5, 8.5)
+
+[node name="OuterRing" type="Polygon2D" parent="Visual"]
+color = Color(1, 0.9, 0.5, 0.4)
+polygon = PackedVector2Array(-16, 0, -11.3, -11.3, 0, -16, 11.3, -11.3, 16, 0, 11.3, 11.3, 0, 16, -11.3, 11.3)
+
+[node name="AnimationTimer" type="Timer" parent="."]
+wait_time = 0.05
+autostart = true
+
+[connection signal="timeout" from="AnimationTimer" to="." method="_on_animation_timer_timeout"]

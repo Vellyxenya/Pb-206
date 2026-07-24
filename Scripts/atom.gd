@@ -5,7 +5,7 @@ const NucleusScene = preload("res://Scenes/nucleus.tscn")
 signal phase_timer_finished
 
 @export var isotope_key: String = "U-238"
-@export var acceleration_force: float = 2600.0
+@export var acceleration_force: float = 5400.0
 @export var movement_damping: float = 1.1
 @export var mouse_deadzone: float = 12.0
 @export var collider_padding: float = 18.0
@@ -18,6 +18,7 @@ var phase_active: bool = false
 var isotope_name: String = ""
 var disk_radius: float = 0.0
 var proton_tint: Color = Color.WHITE
+var charge: int = 0  # 0 = neutral, +1 = positively charged (after β-decay)
 
 
 func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
@@ -35,6 +36,7 @@ func _ready():
 	load_isotope_data()
 	mass = max(1.0, float(mass_number - 200))
 	spawn_nuclei()
+	_update_charge_visual()  # Initialize visual state
 
 func apply_external_force(force: Vector2):
 	external_force += force
@@ -91,6 +93,32 @@ func play_destroy_animation() -> void:
 
 	await get_tree().create_timer(destroy_duration).timeout
 
+func play_decay_effect(decay_type: String) -> void:
+	"""Play visual effect for alpha or beta decay"""
+	print("Decay effect: ", decay_type)
+	
+	if decay_type == "alpha":
+		# Alpha decay: eject 4 nuclei (2 protons + 2 neutrons) as "alpha particle"
+		var nuclei = _get_nucleus_nodes()
+		if nuclei.size() >= 4:
+			# Pick 4 random nuclei to eject
+			nuclei.shuffle()
+			for i in range(min(4, nuclei.size())):
+				var nucleus = nuclei[i]
+				if nucleus.has_method("eject_as_alpha"):
+					nucleus.eject_as_alpha()
+		
+		await get_tree().create_timer(0.5).timeout
+		
+	elif decay_type == "beta":
+		# Beta decay: emit a small electron particle (visual effect)
+		# For now, just a brief flash or pulse
+		print("Beta particle emitted")
+		await get_tree().create_timer(0.3).timeout
+	
+	# Short delay for effect to be visible
+	await get_tree().create_timer(0.2).timeout
+
 func reset_phase_visuals() -> void:
 	_clear_nucleus_nodes()
 	spawn_nuclei()
@@ -121,8 +149,9 @@ func load_isotope_data():
 	phase_time_left = phase_time_total
 	phase_active = true
 	
-	print("Loaded isotope: ", isotope_name, " (", mass_number, ")")
+	print("Loaded isotope: ", isotope_name, " (", mass_number, "), charge: ", charge)
 	print("Phase timer started: ", snapped(phase_time_left, 0.1), "s")
+	_update_charge_visual()
 
 func _get_nucleus_nodes() -> Array[Node]:
 	var nuclei: Array[Node] = []
@@ -187,3 +216,27 @@ func _setup_collision_shape(hex_positions: Array[Vector2]) -> void:
 		collision_shape.shape = circle
 
 	circle.radius = radius
+
+func get_charge() -> int:
+	return charge
+
+func set_charge(new_charge: int) -> void:
+	charge = new_charge
+	print("Charge set to: ", charge)
+	_update_charge_visual()
+
+func _update_charge_visual() -> void:
+	# Update the isotope name label
+	var name_label = get_node_or_null("IsotopeNameLabel") as Label
+	if name_label != null:
+		name_label.text = isotope_name
+	
+	# Update the charge indicator label
+	var charge_label = get_node_or_null("ChargeIndicator") as Label
+	if charge_label != null:
+		if charge > 0:
+			charge_label.text = "+"
+			charge_label.modulate = Color(1.0, 0.3, 0.3)  # Red for positive
+			charge_label.visible = true
+		else:
+			charge_label.visible = false

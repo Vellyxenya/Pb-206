@@ -401,10 +401,6 @@ func _physics_process(delta):
 ## Milestone 10: Scoring System
 **Goal:** Track points for pickups and goal area time
 
-**Why:** Roguelike scoring creates replayability motivation.
-
-**Prerequisites:** M10 complete
-
 **Detailed Steps:**
 1. Create score variable
 2. Add score display UI

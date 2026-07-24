@@ -25,16 +25,23 @@ extends Node2D
 	preload("res://Scenes/ElectronField.tscn")
 ]
 @export var force_field_count: int = 2
+@export var photon_count: int = 45
+@export var points_per_second_in_goal: float = 2.0
+@export var spawn_area_radius: float = 4000.0
 
 const GOAL_VISUAL_SEGMENTS: int = 64
+const PhotonScene = preload("res://Scenes/photon.tscn")
 
 var is_transitioning: bool = false
 var is_game_over: bool = false
 var starting_isotope_key: String = ""
 var current_phase_index: int = 1
+var current_score: int = 0
 var _bleep_time_left: float = 0.0
+var _goal_bonus_accumulator: float = 0.0
 var neutron_fields: Array[Area2D] = []
 var force_fields: Array[Area2D] = []
+var collectibles: Array[Area2D] = []
 var active_neutron_fields: Dictionary = {}
 var lucky_popup_tween: Tween
 var phase_sounds: Array[AudioStream] = []
@@ -44,6 +51,7 @@ var phase_audio_player: AudioStreamPlayer
 @onready var camera: Camera2D = $Player/Atom/Camera2D
 @onready var background: Node2D = $Background
 @onready var timer_label: Label = $UI/PhaseTimerLabel
+@onready var score_label: Label = $UI/ScoreLabel
 @onready var goal_status_label: Label = $UI/GoalStatusLabel
 @onready var transition_flash: ColorRect = $UI/TransitionFlash
 @onready var game_over_overlay: ColorRect = $UI/GameOverOverlay
@@ -57,6 +65,7 @@ var phase_audio_player: AudioStreamPlayer
 @onready var goal_arrow: Sprite2D = $Player/Atom/GoalArrow
 @onready var goal_distance_label: Label = $Player/Atom/GoalDistanceLabel
 @onready var hazards_root: Node2D = $Hazards
+@onready var collectibles_root: Node2D = $Collectibles
 
 func _ready() -> void:
 	if atom != null:
@@ -73,6 +82,9 @@ func _ready() -> void:
 	if lucky_popup_label != null:
 		lucky_popup_label.visible = false
 	Engine.time_scale = 1.0
+	
+	current_score = 0
+	_update_score_display()
 
 	_setup_phase_audio()
 	_play_sound_for_phase(current_phase_index)
@@ -80,6 +92,7 @@ func _ready() -> void:
 	_rebuild_goal_visual()
 	randomize_goal_position()
 	spawn_hazards()
+	spawn_collectibles()
 	_update_goal_area_visual()
 	_update_goal_status(false)
 	_update_goal_guidance(false)
@@ -92,12 +105,36 @@ func _process(_delta):
 		background.set_view_center(background_anchor)
 
 	if atom != null and timer_label != null and atom.has_method("get_phase_time_left"):
-		timer_label.text = "Time: " + str(snapped(atom.get_phase_time_left(), 0.1))
+		var time_left = atom.get_phase_time_left()
+		var isotope_data = IsotopeData.get_isotope(atom.isotope_key)
+		var isotope_name = isotope_data.get("name", atom.isotope_key)
+		var decay_type = isotope_data.get("decay_type", "unknown")
+		
+		# Format decay type for display
+		var decay_display = ""
+		if decay_type == "alpha":
+			decay_display = "α-decay"
+		elif decay_type == "beta":
+			decay_display = "β-decay"
+		elif decay_type == "stable":
+			decay_display = "STABLE"
+		else:
+			decay_display = decay_type
+		
+		timer_label.text = "Phase " + str(current_phase_index) + "/14: " + isotope_name + " (" + decay_display + ")\nTime: " + str(snapped(time_left, 0.1))
 
 	var in_finish_area := is_atom_in_finish_area()
 	_update_goal_area_visual()
 	_update_goal_status(in_finish_area)
 	_update_goal_guidance(in_finish_area)
+	
+	# Award points per second while in goal area
+	if in_finish_area and not is_transitioning and not is_game_over:
+		_goal_bonus_accumulator += points_per_second_in_goal * _delta
+		if _goal_bonus_accumulator >= 1.0:
+			var points_to_add = int(_goal_bonus_accumulator)
+			_goal_bonus_accumulator -= float(points_to_add)
+			add_score(points_to_add)
 
 func _physics_process(delta: float) -> void:
 	if is_transitioning or is_game_over:
@@ -135,6 +172,12 @@ func start_phase_transition(success: bool, death_cause: String = "") -> void:
 
 	if success:
 		print("Phase success: atom in finish area at timer end.")
+		# Play decay effect before transition
+		if atom != null and atom.has_method("play_decay_effect"):
+			var current_data = IsotopeData.get_isotope(atom.isotope_key)
+			var decay_type = current_data.get("decay_type", "unknown")
+			if decay_type != "stable":
+				await atom.play_decay_effect(decay_type)
 	else:
 		print("Phase fail: atom outside finish area at timer end.")
 		if atom != null and atom.has_method("play_destroy_animation"):
@@ -191,8 +234,27 @@ func advance_to_next_phase() -> void:
 	if atom != null:
 		atom.on_phase_completed()
 		var current_data = IsotopeData.get_isotope(atom.isotope_key)
+		
+		# Check if we've reached stable Pb-206 (no next isotope)
+		if not current_data.is_empty() and current_data.get("next_isotope") == null:
+			# Victory! Reached stable isotope
+			show_victory_screen()
+			return
+		
 		if not current_data.is_empty() and current_data.get("next_isotope") != null:
+			var decay_type = current_data.get("decay_type", "alpha")
 			atom.isotope_key = str(current_data.next_isotope)
+			
+			# Set charge based on decay type
+			# Beta decay emits an electron, leaving the atom with +1 charge
+			# Alpha decay removes 2p+2n, atom remains neutral (0 charge)
+			if decay_type == "beta":
+				atom.set_charge(1)
+				print("β-decay occurred: atom is now positively charged (+1)")
+			else:
+				atom.set_charge(0)
+				print("α-decay occurred: atom remains neutral (0)")
+			
 			advanced = true
 
 	if advanced:
@@ -201,9 +263,19 @@ func advance_to_next_phase() -> void:
 
 	randomize_goal_position()
 	spawn_hazards()
+	spawn_collectibles()
 	if atom != null:
 		atom.load_isotope_data()
 		atom.reset_phase_visuals()
+
+func show_victory_screen() -> void:
+	is_game_over = true
+	Engine.time_scale = 0.5
+	if game_over_overlay != null:
+		game_over_overlay.visible = true
+	if game_over_title != null:
+		game_over_title.text = "VICTORY!\n\nYou reached stable Lead-206!\n\nFinal Score: " + str(current_score)
+	print("Victory! Reached stable Pb-206 with score: ", current_score)
 
 func restart_current_phase() -> void:
 	is_game_over = false
@@ -212,6 +284,10 @@ func restart_current_phase() -> void:
 	if game_over_overlay != null:
 		game_over_overlay.visible = false
 
+	current_score = 0
+	_goal_bonus_accumulator = 0.0
+	_update_score_display()
+
 	if atom != null and not starting_isotope_key.is_empty():
 		atom.isotope_key = starting_isotope_key
 	current_phase_index = 1
@@ -219,7 +295,9 @@ func restart_current_phase() -> void:
 
 	randomize_goal_position()
 	spawn_hazards()
+	spawn_collectibles()
 	if atom != null:
+		atom.set_charge(0)  # Reset to neutral on restart
 		atom.load_isotope_data()
 		atom.reset_phase_visuals()
 
@@ -234,6 +312,47 @@ func enter_game_over_state(death_cause: String = "Timer expired outside finish a
 func spawn_hazards() -> void:
 	spawn_neutron_fields()
 	spawn_force_fields()
+
+func spawn_collectibles() -> void:
+	clear_collectibles()
+	if collectibles_root == null or atom == null:
+		return
+	
+	var photons_to_spawn = max(photon_count, 0)
+	print("Spawning ", photons_to_spawn, " photons")
+	for _i in range(photons_to_spawn):
+		var photon = PhotonScene.instantiate()
+		photon.position = _pick_collectible_position()
+		photon.move_direction = Vector2.from_angle(randf() * TAU).normalized()
+		photon.collected.connect(_on_collectible_collected)
+		collectibles_root.add_child(photon)
+		collectibles.append(photon)
+	print("Photons spawned: ", collectibles.size())
+
+func clear_collectibles() -> void:
+	for collectible in collectibles:
+		if is_instance_valid(collectible):
+			collectible.queue_free()
+	collectibles.clear()
+
+func _pick_collectible_position() -> Vector2:
+	"""Pick a random position for collectibles, spread widely across the map"""
+	var center = atom.global_position if atom != null else Vector2.ZERO
+	var angle = randf() * TAU
+	var distance = randf_range(200.0, spawn_area_radius)
+	return center + Vector2.from_angle(angle) * distance
+
+func _on_collectible_collected(_collector: Node2D, points: int) -> void:
+	add_score(points)
+	print("Collected! +", points, " points. Total: ", current_score)
+
+func add_score(points: int) -> void:
+	current_score += points
+	_update_score_display()
+
+func _update_score_display() -> void:
+	if score_label != null:
+		score_label.text = "Score: " + str(current_score)
 
 func spawn_force_fields() -> void:
 	clear_force_fields()

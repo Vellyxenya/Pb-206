@@ -6,7 +6,7 @@
 [sub_resource type="CircleShape2D" id="CircleShape2D_cdecr"]
 radius = 32.01562
 
-[node name="Atom" type="RigidBody2D" unique_name_in_owner="true" groups=["player"]]
+[node name="Atom" type="RigidBody2D" unique_name_in_owner="true" groups=["player", "player_atom"]]
 gravity_scale = 0.0
 lock_rotation = true
 script = ExtResource("1_cdecr")
@@ -30,3 +30,32 @@ offset_right = 70.0
 offset_bottom = -134.0
 theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
+
+[node name="IsotopeNameLabel" type="Label" parent="."]
+z_index = 25
+offset_left = -100.0
+offset_top = -90.0
+offset_right = 100.0
+offset_bottom = -60.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 20
+text = "Uranium-238"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ChargeIndicator" type="Label" parent="."]
+visible = false
+z_index = 30
+offset_left = 45.0
+offset_top = -55.0
+offset_right = 85.0
+offset_bottom = -15.0
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 32
+text = "+"
+horizontal_alignment = 1
+vertical_alignment = 1
