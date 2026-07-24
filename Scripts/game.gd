@@ -26,11 +26,15 @@ extends Node2D
 ]
 @export var force_field_count: int = 2
 @export var photon_count: int = 45
+@export var neutrino_count: int = 30
+@export var neutrino_speed_min: float = 300.0
+@export var neutrino_speed_max: float = 500.0
 @export var points_per_second_in_goal: float = 2.0
 @export var spawn_area_radius: float = 4000.0
 
 const GOAL_VISUAL_SEGMENTS: int = 64
 const PhotonScene = preload("res://Scenes/photon.tscn")
+const NeutrinoScene = preload("res://Scenes/neutrino.tscn")
 
 var is_transitioning: bool = false
 var is_game_over: bool = false
@@ -42,6 +46,7 @@ var _goal_bonus_accumulator: float = 0.0
 var neutron_fields: Array[Area2D] = []
 var force_fields: Array[Area2D] = []
 var collectibles: Array[Area2D] = []
+var neutrinos: Array[Area2D] = []
 var active_neutron_fields: Dictionary = {}
 var lucky_popup_tween: Tween
 var phase_sounds: Array[AudioStream] = []
@@ -68,6 +73,8 @@ var phase_audio_player: AudioStreamPlayer
 @onready var collectibles_root: Node2D = $Collectibles
 
 func _ready() -> void:
+	add_to_group("game")  # Allow hazards to find the game node
+	
 	if atom != null:
 		starting_isotope_key = atom.isotope_key
 		atom.phase_timer_finished.connect(_on_atom_phase_timer_finished)
@@ -312,6 +319,7 @@ func enter_game_over_state(death_cause: String = "Timer expired outside finish a
 func spawn_hazards() -> void:
 	spawn_neutron_fields()
 	spawn_force_fields()
+	spawn_neutrinos()
 
 func spawn_collectibles() -> void:
 	clear_collectibles()
@@ -393,6 +401,46 @@ func clear_force_fields() -> void:
 		if is_instance_valid(field):
 			field.queue_free()
 	force_fields.clear()
+
+func spawn_neutrinos() -> void:
+	clear_neutrinos()
+	if hazards_root == null or atom == null:
+		return
+	
+	var neutrinos_to_spawn = max(neutrino_count, 0)
+	print("Spawning ", neutrinos_to_spawn, " neutrinos")
+	for _i in range(neutrinos_to_spawn):
+		var neutrino = NeutrinoScene.instantiate()
+		neutrino.position = _pick_neutrino_spawn_position()
+		neutrino.speed = randf_range(neutrino_speed_min, neutrino_speed_max)
+		
+		# Set direction towards a random point that might intersect with gameplay area
+		var direction_angle = randf() * TAU
+		neutrino.set_direction(Vector2.from_angle(direction_angle))
+		
+		hazards_root.add_child(neutrino)
+		neutrinos.append(neutrino)
+	print("Neutrinos spawned: ", neutrinos.size())
+
+func clear_neutrinos() -> void:
+	for neutrino in neutrinos:
+		if is_instance_valid(neutrino):
+			neutrino.queue_free()
+	neutrinos.clear()
+
+func _pick_neutrino_spawn_position() -> Vector2:
+	"""Pick a spawn position for neutrinos at the edge of the play area"""
+	var center = atom.global_position if atom != null else Vector2.ZERO
+	var angle = randf() * TAU
+	var distance = spawn_area_radius * 1.2  # Spawn outside main area
+	return center + Vector2.from_angle(angle) * distance
+
+func on_player_neutrino_death() -> void:
+	"""Called when a neutrino hits the player"""
+	print("Player hit by neutrino!")
+	if atom != null and atom.has_method("play_destroy_animation"):
+		await atom.play_destroy_animation()
+	enter_game_over_state("Destroyed by neutrino collision!")
 
 func _create_neutron_field(radius: float) -> Area2D:
 	var field := Area2D.new()

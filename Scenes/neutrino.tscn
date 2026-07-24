@@ -1,0 +1,37 @@
+[gd_scene format=3 uid="uid://cqw8x4miargkr"]
+
+[ext_resource type="Script" path="res://Scripts/neutrino.gd" id="1_neutrino"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_neutrino"]
+radius = 14.0
+
+[node name="Neutrino" type="Area2D" unique_id=1791135697 groups=["hazards", "neutrinos"]]
+collision_layer = 16
+script = ExtResource("1_neutrino")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=386085179]
+shape = SubResource("CircleShape2D_neutrino")
+
+[node name="TrajectoryLine" type="Line2D" parent="." unique_id=783022550]
+z_index = -1
+width = 3.0
+default_color = Color(0.7, 0.3, 0.9, 0.5)
+antialiased = true
+
+[node name="Visual" type="Node2D" parent="." unique_id=1693582212]
+
+[node name="OuterGlow" type="Polygon2D" parent="Visual" unique_id=957493568]
+color = Color(0.6, 0.2, 0.8, 0.3)
+polygon = PackedVector2Array(-18, 0, -12.7, -12.7, 0, -18, 12.7, -12.7, 18, 0, 12.7, 12.7, 0, 18, -12.7, 12.7)
+
+[node name="MiddleRing" type="Polygon2D" parent="Visual" unique_id=2022047752]
+color = Color(0.7, 0.3, 0.9, 0.6)
+polygon = PackedVector2Array(-14, 0, -9.9, -9.9, 0, -14, 9.9, -9.9, 14, 0, 9.9, 9.9, 0, 14, -9.9, 9.9)
+
+[node name="Core" type="Polygon2D" parent="Visual" unique_id=2025031584]
+color = Color(0.85, 0.5, 1, 0.9)
+polygon = PackedVector2Array(-10, 0, -7.1, -7.1, 0, -10, 7.1, -7.1, 10, 0, 7.1, 7.1, 0, 10, -7.1, 7.1)
+
+[node name="InnerCore" type="Polygon2D" parent="Visual" unique_id=437828227]
+color = Color(0.95, 0.7, 1, 1)
+polygon = PackedVector2Array(-6, 0, -4.2, -4.2, 0, -6, 4.2, -4.2, 6, 0, 4.2, 4.2, 0, 6, -4.2, 4.2)
