@@ -1,0 +1,100 @@
+[gd_scene format=3 uid="uid://b5gn0yawe0h87"]
+
+[ext_resource type="Script" path="res://Scripts/credits.gd" id="1_credits"]
+[ext_resource type="Texture2D" uid="uid://bnog00sd55ivu" path="res://Assets/KokoaInteractiveLogoTransparent.png" id="2_logo"]
+[ext_resource type="FontFile" uid="uid://4ham724licbw" path="res://Assets/Fonts/Quantico/Quantico-Bold.ttf" id="3_1bamb"]
+[ext_resource type="FontFile" uid="uid://cfw0w3v8xsull" path="res://Assets/Fonts/Quantico/Quantico-Regular.ttf" id="4_xelri"]
+
+[node name="Credits" type="Control" unique_id=1467670542]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_credits")
+
+[node name="Background" type="ColorRect" parent="." unique_id=603453877]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.1, 0.1, 0.15, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="." unique_id=8835069]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer" unique_id=1591774552]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=71244179]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
+text = "CREDITS"
+horizontal_alignment = 1
+
+[node name="Spacer1" type="Control" parent="CenterContainer/VBoxContainer" unique_id=2107514357]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="Logo" type="TextureRect" parent="CenterContainer/VBoxContainer" unique_id=683159710]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+texture = ExtResource("2_logo")
+stretch_mode = 5
+
+[node name="Spacer2" type="Control" parent="CenterContainer/VBoxContainer" unique_id=1382576184]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="CompanyLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=413362128]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_1bamb")
+theme_override_font_sizes/font_size = 32
+text = "Game by Kokoa Interactive"
+horizontal_alignment = 1
+
+[node name="Spacer3" type="Control" parent="CenterContainer/VBoxContainer" unique_id=247240571]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="CreatorLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=1865052752]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_xelri")
+theme_override_font_sizes/font_size = 24
+text = "Developed By: Noureddine Gueddach"
+horizontal_alignment = 1
+
+[node name="Spacer4" type="Control" parent="CenterContainer/VBoxContainer" unique_id=1722169242]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="MusicLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=1081909272]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_xelri")
+theme_override_font_sizes/font_size = 20
+text = "Music: weloveindies.com/en/welcome/jammers
+Font: fonts.google.com/specimen/Quantico"
+horizontal_alignment = 1
+
+[node name="BackButton" type="Button" parent="." unique_id=1518306662]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -60.0
+offset_right = 120.0
+offset_bottom = -20.0
+grow_vertical = 0
+theme_override_fonts/font = ExtResource("4_xelri")
+theme_override_font_sizes/font_size = 20
+text = "Back"

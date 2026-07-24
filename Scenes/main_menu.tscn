@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://d2m3unejt7bfv"]
 
 [ext_resource type="Script" uid="uid://c6bhfpia8tmhf" path="res://Scripts/main_menu.gd" id="1_mainmenu"]
+[ext_resource type="FontFile" uid="uid://cfw0w3v8xsull" path="res://Assets/Fonts/Quantico/Quantico-Regular.ttf" id="2_48xlc"]
 
 [node name="MainMenu" type="Control" unique_id=521885236]
 layout_mode = 3
@@ -52,11 +53,22 @@ layout_mode = 2
 [node name="StartButton" type="Button" parent="Center/VBox" unique_id=1026234577]
 custom_minimum_size = Vector2(280, 56)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_48xlc")
+theme_override_font_sizes/font_size = 24
 text = "Start Run"
+
+[node name="CreditsButton" type="Button" parent="Center/VBox" unique_id=85551215]
+custom_minimum_size = Vector2(280, 56)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_48xlc")
+theme_override_font_sizes/font_size = 24
+text = "Credits"
 
 [node name="QuitButton" type="Button" parent="Center/VBox" unique_id=25659451]
 custom_minimum_size = Vector2(280, 56)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("2_48xlc")
+theme_override_font_sizes/font_size = 24
 text = "Quit"
 
 [node name="Hint" type="Label" parent="Center/VBox" unique_id=1609385451]
