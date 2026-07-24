@@ -20,6 +20,12 @@ extends Node2D
 @export var neutron_ring_base_color: Color = Color(1.0, 0.58, 0.18, 0.72)
 @export var neutron_ring_charge_color: Color = Color(1.0, 0.78, 0.28, 1.0)
 
+@export var hazard_scenes: Array[PackedScene] = [
+	preload("res://Scenes/ProtonField.tscn"),
+	preload("res://Scenes/ElectronField.tscn")
+]
+@export var force_field_count: int = 2
+
 const GOAL_VISUAL_SEGMENTS: int = 64
 
 var is_transitioning: bool = false
@@ -28,6 +34,7 @@ var starting_isotope_key: String = ""
 var current_phase_index: int = 1
 var _bleep_time_left: float = 0.0
 var neutron_fields: Array[Area2D] = []
+var force_fields: Array[Area2D] = []
 var active_neutron_fields: Dictionary = {}
 var lucky_popup_tween: Tween
 var phase_sounds: Array[AudioStream] = []
@@ -72,7 +79,7 @@ func _ready() -> void:
 
 	_rebuild_goal_visual()
 	randomize_goal_position()
-	spawn_neutron_fields()
+	spawn_hazards()
 	_update_goal_area_visual()
 	_update_goal_status(false)
 	_update_goal_guidance(false)
@@ -193,7 +200,7 @@ func advance_to_next_phase() -> void:
 	_play_sound_for_phase(current_phase_index)
 
 	randomize_goal_position()
-	spawn_neutron_fields()
+	spawn_hazards()
 	if atom != null:
 		atom.load_isotope_data()
 		atom.reset_phase_visuals()
@@ -211,7 +218,7 @@ func restart_current_phase() -> void:
 	_play_sound_for_phase(current_phase_index)
 
 	randomize_goal_position()
-	spawn_neutron_fields()
+	spawn_hazards()
 	if atom != null:
 		atom.load_isotope_data()
 		atom.reset_phase_visuals()
@@ -223,6 +230,23 @@ func enter_game_over_state(death_cause: String = "Timer expired outside finish a
 		game_over_overlay.visible = true
 	if game_over_title != null:
 		game_over_title.text = "GAME OVER\n" + death_cause
+
+func spawn_hazards() -> void:
+	spawn_neutron_fields()
+	spawn_force_fields()
+
+func spawn_force_fields() -> void:
+	clear_force_fields()
+	if hazards_root == null or atom == null or hazard_scenes.is_empty():
+		return
+
+	var fields_to_make = max(force_field_count, 0)
+	for _i in fields_to_make:
+		var scene = hazard_scenes.pick_random()
+		var field = scene.instantiate()
+		field.position = _pick_hazard_position()
+		hazards_root.add_child(field)
+		force_fields.append(field)
 
 func spawn_neutron_fields() -> void:
 	clear_neutron_fields()
@@ -244,6 +268,12 @@ func clear_neutron_fields() -> void:
 			field.queue_free()
 	neutron_fields.clear()
 	active_neutron_fields.clear()
+
+func clear_force_fields() -> void:
+	for field in force_fields:
+		if is_instance_valid(field):
+			field.queue_free()
+	force_fields.clear()
 
 func _create_neutron_field(radius: float) -> Area2D:
 	var field := Area2D.new()

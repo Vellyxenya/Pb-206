@@ -11,13 +11,21 @@ signal phase_timer_finished
 @export var collider_padding: float = 18.0
 
 var mass_number: int
-var disk_radius: float
-var isotope_name: String
-var proton_tint: Color = Color(0.95, 0.25, 0.25)
-
-var phase_time_total: float = 0.0
+var external_force: Vector2 = Vector2.ZERO
 var phase_time_left: float = 0.0
+var phase_time_total: float = 0.0
 var phase_active: bool = false
+var isotope_name: String = ""
+var disk_radius: float = 0.0
+var proton_tint: Color = Color.WHITE
+
+
+func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
+	var force_to_apply = external_force
+	if force_to_apply != Vector2.ZERO:
+		state.apply_central_force(force_to_apply)
+		external_force = Vector2.ZERO
+
 
 func _ready():
 	gravity_scale = 0.0
@@ -27,6 +35,9 @@ func _ready():
 	load_isotope_data()
 	mass = max(1.0, float(mass_number - 200))
 	spawn_nuclei()
+
+func apply_external_force(force: Vector2):
+	external_force += force
 
 func drive_towards(world_target: Vector2) -> void:
 	tick_phase_timer(get_physics_process_delta_time())

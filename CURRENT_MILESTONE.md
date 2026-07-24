@@ -1,103 +1,108 @@
-# Current Milestone: M7 - Basic Hazards (Neutron Fields)
+# Current Milestone: M8 - Advanced Hazards (Repulsion/Attraction Fields)
 
 ## Goal
-Add the first hazard type: neutron fields embedded directly in the existing game scene.
+Introduce two new hazard types: repulsion and attraction fields. These fields will apply forces to the atom, pushing it away or pulling it in, creating new navigational challenges.
 
 ## Why This Matters
-M6 completed phase outcomes and game-over flow. M7 introduces risk during navigation so reaching the finish area is no longer only a movement/time challenge. Instead of constant damage, hazard pressure is now event-based: each bleep is a high-stakes moment.
+M7 introduced a simple probabilistic hazard. M8 adds physics-based hazards that directly affect player movement. This requires more skillful navigation and adds variety to the gameplay, moving beyond simple "stay out of the zone" mechanics.
 
 ## Prerequisites
-- M6 complete (success/fail resolution, game over UI, restart flow)
-- Goal system and timer system working
+- M7 complete (basic neutron field hazards)
+- Player movement and physics are stable
 
 ---
 
 ## Step-by-Step Instructions
 
-### Step 1: Add Hazards In Existing Scene
-Do **not** create a new scene. Add hazards directly to `Scenes/game.tscn`:
-1. Under `Game`, add `Node2D` named `Hazards`
-2. Add one `Area2D` child template named `NeutronField`
-3. Give it a `CollisionShape2D` with `CircleShape2D`
-4. Add simple visual children (`Polygon2D`/`Line2D`/`Sprite2D`)
-5. Duplicate this in-scene field or instantiate extra `Area2D` fields from `game.gd`
+### Step 1: Create New Hazard Scenes/Types
+1.  In `Scenes/`, you can either create new scenes for the new hazards or add them as variations in your existing hazard setup. Let's create distinct scenes for clarity.
+2.  Create `ProtonField.tscn` and `ElectronField.tscn`.
+3.  Both scenes will have an `Area2D` as the root node.
+4.  Add a `CollisionShape2D` to each, similar to the `NeutronField`.
+5.  Add distinct visuals for each field type. For example:
+    *   `ProtonField`: A reddish hue or particles moving outward.
+    *   `ElectronField`: A bluish hue or particles spiraling inward.
 
-### Step 2: Create Hazard Script
-Implement hazard logic inside `Scripts/game.gd` (or lightweight helper script) with periodic bleeps:
+### Step 2: Implement Force-Application Logic
+Instead of a kill chance, these fields will apply a force.
+
+1.  In `Scripts/player.gd` (or wherever you handle player physics), add functions to apply forces.
+
+    ```gdscript
+    # In player.gd
+    var external_force = Vector2.ZERO
+
+    func _physics_process(delta):
+        # ... existing movement code ...
+        var total_force = velocity + external_force
+        # Apply total_force
+        # ...
+        # Reset external force each frame
+        external_force = Vector2.ZERO
+
+    func apply_external_force(force: Vector2):
+        external_force += force
+    ```
+
+2.  Create scripts for the new fields, `ProtonField.gd` and `ElectronField.gd`.
+
+    **`ProtonField.gd`:**
+    ```gdscript
+    extends Area2D
+
+    @export var repulsion_strength: float = 500.0
+
+    func _physics_process(delta: float):
+        var overlapping_bodies = get_overlapping_bodies()
+        for body in overlapping_bodies:
+            if body.is_in_group("player"):
+                var direction_away = global_position.direction_to(body.global_position)
+                body.apply_external_force(direction_away * repulsion_strength * delta)
+    ```
+
+    **`ElectronField.gd`:**
+    ```gdscript
+    extends Area2D
+
+    @export var attraction_strength: float = 500.0
+
+    func _physics_process(delta: float):
+        var overlapping_bodies = get_overlapping_bodies()
+        for body in overlapping_bodies:
+            if body.is_in_group("player"):
+                var direction_towards = body.global_position.direction_to(global_position)
+                body.apply_external_force(direction_towards * attraction_strength * delta)
+    ```
+3.  Ensure your `player` node is in the "player" group.
+
+### Step 3: Add New Hazards to the Game
+In `Scenes/game.tscn`, instance a few of your new `ProtonField` and `ElectronField` scenes under the `Hazards` node. Place them strategically to create interesting navigational puzzles.
+
+### Step 4: Refine Visual and Audio Feedback
+1.  **Visuals**: Make sure the fields are easily distinguishable. Consider adding particle effects (`CPUParticles2D`) to show the direction of the force (outward for repulsion, inward for attraction).
+2.  **Audio**: Add subtle, continuous sound effects when the player is inside one of these fields. Use `AudioStreamPlayer2D` in each field's scene. The volume could increase as the player gets closer to the center.
+
+### Step 5: Balancing
+Playtest the game and adjust the `repulsion_strength` and `attraction_strength` values. The forces should be strong enough to be a challenge but not so strong that they make the game unplayable. They should present a risk/reward, not a complete barrier.
+
+### Step 6: Update Hazard Management
+If you are spawning hazards procedurally in `game.gd`, update your logic to include the new hazard types. You can use an array of hazard scenes to pick from.
 
 ```gdscript
-@export var neutron_bleep_interval: float = 2.0
-@export var neutron_kill_chance: float = 0.28
+# In game.gd
+@export var hazard_scenes: Array[PackedScene] = [
+    preload("res://Scenes/NeutronField.tscn"),
+    preload("res://Scenes/ProtonField.tscn"),
+    preload("res://Scenes/ElectronField.tscn")
+]
 
-var _bleep_time_left: float = 0.0
-
-func _physics_process(delta: float) -> void:
-_bleep_time_left -= delta
-if _bleep_time_left > 0.0:
-return
-
-_bleep_time_left = neutron_bleep_interval
-run_neutron_bleep()
-
-func run_neutron_bleep() -> void:
-# For each neutron field, if atom is inside at bleep time:
-#   - roll RNG
-#   - on fail: trigger game over flow
-#   - on survive: show floating "I got lucky"
+func spawn_random_hazard():
+    var random_hazard_scene = hazard_scenes.pick_random()
+    var new_hazard = random_hazard_scene.instantiate()
+    # ... rest of the spawning logic
 ```
 
-### Step 3: Add In-Field Check Helper
-In `Scripts/game.gd`, add a helper to test whether atom is inside a field at bleep time:
-
-```gdscript
-func is_atom_inside_field(field: Area2D) -> bool:
-if atom == null or field == null:
-return false
-for body in field.get_overlapping_bodies():
-if body == atom:
-return true
-return false
-```
-
-### Step 4: Bleep Resolution Rule
-During each bleep for each field:
-1. If atom is not inside: nothing happens
-2. If atom is inside:
-  - Roll random chance
-  - If roll <= `neutron_kill_chance`: trigger existing M6 failure/game-over flow
-  - Else: player survives and gets visual feedback
-
-### Step 5: Add "I got lucky" Floating Feedback
-In `Scenes/game.tscn`, under `UI`, add a label for transient hazard feedback:
-- `LuckyPopupLabel` (initially hidden)
-
-In `Scripts/game.gd`, add a helper like:
-
-```gdscript
-func show_lucky_popup(world_pos: Vector2) -> void:
-# Set text: "I got lucky"
-# Position near player or above field
-# Tween upward and fade alpha to 0
-# Hide/reset after tween
-```
-
-### Step 6: Hazard Placement in Current Scene
-If hazards are generated dynamically in `game.gd`, keep safe placement rules:
-- Keep away from atom spawn
-- Keep away from finish area center
-- Keep inside broad play band around player
-- Retry random samples up to N attempts
-
-If hazards are manually authored in `game.tscn`, ensure they are not placed on the initial player spawn.
-
-### Step 7: Add Hazard UI Feedback
-Keep existing timer/status labels.
-Add short bleep feedback states:
-- Optional text when a field bleeps while player is outside (for debugging)
-- Mandatory floating `"I got lucky"` when player survives a lethal roll
-
-### Step 8: Respawn Hazards on Phase Change
-In both success and restart flows in `game.gd`:
+Good luck!
 - clear old hazards
 - rebuild/reposition hazards after goal randomization (still within current scene flow)
 
