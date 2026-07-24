@@ -371,25 +371,7 @@ func _physics_process(delta):
 
 ---
 
-## Milestone 8: Containment Walls
-**Goal:** Level boundaries that kill on contact
-
-**Why:** Defines play area and second hazard type.
-
-**Prerequisites:** M7 complete
-
-**Detailed Steps:**
-1. Create StaticBody2D walls around play area
-2. Detect player collision with walls
-3. Trigger game over on wall collision
-4. Make walls visually clear (white/gray borders)
-
-**Verification:**
-- Visible boundaries around play area
-- Hitting wall → game over
-- Walls contain the movement area
-
-**Expected Result:** Clear arena boundaries
+## Milestone 8: Attraction and repulsion fields
 
 ---
 
@@ -416,34 +398,7 @@ func _physics_process(delta):
 
 ---
 
-## Milestone 10: Phase Transitions (Decay)
-**Goal:** When timer expires (and goal reached), transition to next isotope
-
-**Why:** Implements the decay chain progression.
-
-**Prerequisites:** M9 complete
-
-**Detailed Steps:**
-1. When timer expires and `goal_reached == true`:
-   - Look up `next_isotope` from current isotope data
-   - Call `load_isotope(next_isotope)`
-   - Reset goal_reached flag
-   - Spawn new goal area
-   - Start new timer
-2. Test transition from U-238 → Th-234 → Pa-234
-
-**Verification:**
-- Starting as U-238 (green, large, heavy)
-- After reaching goal and timer expires → becomes Th-234 (orange, smaller, lighter)
-- New goal area spawns
-- New timer starts
-- Can transition multiple times
-
-**Expected Result:** Smooth transition through decay chain
-
----
-
-## Milestone 11: Scoring System
+## Milestone 10: Scoring System
 **Goal:** Track points for pickups and goal area time
 
 **Why:** Roguelike scoring creates replayability motivation.
@@ -468,8 +423,8 @@ func _physics_process(delta):
 
 ---
 
-## Milestone 12: Electric Fields & Charge
-**Goal:** Add charged state and electric field interactions
+## Milestone 11: Electric Fields & Charge
+**Goal:** Add charged state and electric field interactions. To do this update the ProtonField and ElectronField to only work on charged atoms. Also need to display the current charge visually on the atom. And also need to display the name of the current atom on top of the atom.
 
 **Why:** Core physics-based navigation mechanic.
 
@@ -490,56 +445,3 @@ func _physics_process(delta):
 - Can use fields to navigate around hazards
 
 **Expected Result:** Fields affect movement based on charge state
-
----
-
-## Milestone 13: Full Game Loop & Polish
-**Goal:** Complete all 14 phases, add all hazards, polish visuals/audio
-
-**Why:** Brings everything together into complete game.
-
-**Prerequisites:** M12 complete
-
-**Detailed Steps:**
-1. Add remaining hazard types (energy barriers, magnetic vortices, etc.)
-2. Implement procedural hazard placement
-3. Balance timer durations and hazard density
-4. Add victory screen for reaching Pb-206
-5. Add particle effects for decay
-6. Add audio cues
-7. Polish UI
-8. Playtesting and balancing
-
-**Verification:**
-- Can play through all 14 phases
-- Each phase feels distinct
-- Difficulty ramps appropriately
-- Victory screen appears after Pb-206
-- Game is fun and challenging
-
-**Expected Result:** Complete, polished game
-
----
-
-## Progress Tracking
-Current Milestone: **Not Started**  
-Last Completed: **None**  
-
-## Notes
-- Each milestone should take 30-90 minutes
-- We verify completion before moving on
-- If stuck, we can break a milestone into smaller sub-steps
-- Code will be provided for each step
-- UI navigation guidance included for Godot interface
-
----
-
-## Quick Reference: Godot UI Locations
-- **Create Scene:** Scene menu > New Scene
-- **Add Node:** Click + button in Scene panel (or Ctrl+A)
-- **Inspector:** Right panel - shows properties of selected node
-- **FileSystem:** Bottom-left panel - your project files
-- **Run Game:** F5 or click play button (top-right)
-- **Stop Game:** F8 or click stop button
-- **Save Scene:** Ctrl+S
-- **Project Settings:** Project menu > Project Settings
