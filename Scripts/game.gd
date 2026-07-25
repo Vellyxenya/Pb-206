@@ -19,6 +19,7 @@ var lucky_popup_tween: Tween
 var phase_sounds: Array[AudioStream] = []
 var phase_audio_player: AudioStreamPlayer
 var victory_music: AudioStream = null
+var music_fade_tween: Tween = null  # Tween for music fade transitions
 
 @onready var atom: RigidBody2D = $Player/Atom
 @onready var camera: Camera2D = $Player/Atom/Camera2D
@@ -262,11 +263,9 @@ func handle_stable_isotope_victory() -> void:
 	"""Handle transition to stable Pb-206 isotope"""
 	print("Reached stable Pb-206! Starting victory sequence...")
 	
-	# Play victory music
+	# Fade to victory music
 	if phase_audio_player != null and victory_music != null:
-		phase_audio_player.stop()
-		phase_audio_player.stream = victory_music
-		phase_audio_player.play()
+		await _fade_to_music(victory_music)
 	else:
 		print("Warning: Victory music not available")
 	
@@ -391,11 +390,27 @@ func _on_restart_pressed() -> void:
 
 func _on_main_menu_pressed() -> void:
 	Engine.time_scale = 1.0
+	# Fade out game music before returning to main menu
+	if phase_audio_player != null and phase_audio_player.playing:
+		await _fade_out_music()
 	if ResourceLoader.exists("res://Scenes/main_menu.tscn"):
 		get_tree().change_scene_to_file("res://Scenes/main_menu.tscn")
 	else:
 		print("Main menu scene missing; closing game.")
 		get_tree().quit()
+
+func _fade_out_music() -> void:
+	"""Fade out the current music smoothly"""
+	if phase_audio_player == null:
+		return
+	
+	if music_fade_tween != null:
+		music_fade_tween.kill()
+	
+	music_fade_tween = create_tween()
+	music_fade_tween.tween_property(phase_audio_player, "volume_db", -80.0, 1.0)
+	await music_fade_tween.finished
+	phase_audio_player.stop()
 
 func _update_goal_area_visual() -> void:
 	if goal_area != null and spawn_manager != null:
@@ -544,6 +559,31 @@ func _play_sound_for_phase(phase_index: int) -> void:
 		push_warning("No phase sound found for phase " + str(phase_index))
 		return
 
-	phase_audio_player.stop()
-	phase_audio_player.stream = phase_sounds[music_index - 1]
+	await _fade_to_music(phase_sounds[music_index - 1])
+
+func _fade_to_music(new_stream: AudioStream) -> void:
+	"""Smoothly fade out current music and fade in new music"""
+	if phase_audio_player == null:
+		return
+	
+	# Kill any existing fade tween
+	if music_fade_tween != null:
+		music_fade_tween.kill()
+	
+	music_fade_tween = create_tween()
+	
+	# Fade out current music if playing
+	if phase_audio_player.playing:
+		music_fade_tween.tween_property(phase_audio_player, "volume_db", -80.0, 1.0)
+		await music_fade_tween.finished
+		phase_audio_player.stop()
+	
+	# Switch to new stream
+	phase_audio_player.stream = new_stream
+	phase_audio_player.volume_db = -80.0
 	phase_audio_player.play()
+	
+	# Fade in new music
+	music_fade_tween = create_tween()
+	music_fade_tween.tween_property(phase_audio_player, "volume_db", 0.0, 1.0)
+	await music_fade_tween.finished

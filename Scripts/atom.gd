@@ -295,7 +295,8 @@ func spawn_electrons(electron_count: int) -> void:
 		
 		# Distribute electron pairs evenly around the shell
 		for i in range(electrons_in_shell):
-			var pair_index = int(i / 2)
+			@warning_ignore("integer_division")
+			var pair_index: int = i / 2
 			var is_second_in_pair = (i % 2) == 1
 			
 			# Base angle for this pair
