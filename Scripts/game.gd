@@ -1,11 +1,12 @@
 extends Node2D
 
 @export var goal_radius: float = 1200.0
-@export var goal_arrow_padding: float = 42.0
+@export var goal_arrow_padding: float = 142.0
 @export var transition_duration: float = 0.8
 @export var goal_margin: float = 220.0
 @export var game_over_time_scale: float = 0.22
 @export var points_per_second_in_goal: float = 2.0
+@export var energy_per_photon: float = 15.0
 
 const GOAL_VISUAL_SEGMENTS: int = 64
 
@@ -22,6 +23,7 @@ var victory_music: AudioStream = null
 var game_over_sound: AudioStream = null
 var music_fade_tween: Tween = null  # Tween for music fade transitions
 var sfx_player: AudioStreamPlayer = null  # Sound effects player
+var blink_tween: Tween
 
 @onready var atom: RigidBody2D = $Player/Atom
 @onready var camera: Camera2D = $Player/Atom/Camera2D
@@ -170,6 +172,8 @@ func start_phase_transition(success: bool, death_cause: String = "") -> void:
 			var decay_type = current_data.get("decay_type", "unknown")
 			if decay_type != "stable":
 				await atom.play_decay_effect(decay_type)
+				# Show decay transition text
+				await show_decay_transition_text(current_data, decay_type)
 	else:
 		print("Phase fail: atom outside finish area at timer end.")
 		if atom != null and atom.has_method("play_destroy_animation"):
@@ -198,6 +202,127 @@ func play_transition_flash(success: bool) -> void:
 	tween.tween_property(transition_flash, "color:a", 0.0, transition_duration * 0.65)
 	await tween.finished
 	transition_flash.visible = false
+
+func show_decay_transition_text(current_data: Dictionary, decay_type: String) -> void:
+	"""Show animated text explaining the decay transition"""
+	if atom == null:
+		return
+	
+	# Get next isotope info
+	var next_isotope_key = current_data.get("next_isotope", "")
+	if next_isotope_key == "":
+		return
+	
+	var next_data = IsotopeData.get_isotope(next_isotope_key)
+	if next_data.is_empty():
+		return
+	
+	var current_name = current_data.get("name", "")
+	var next_name = next_data.get("name", "")
+	
+	# Create overlay container
+	var overlay = ColorRect.new()
+	overlay.name = "DecayTransitionOverlay"
+	overlay.color = Color(0, 0, 0, 0.7)
+	overlay.anchor_right = 1.0
+	overlay.anchor_bottom = 1.0
+	overlay.z_index = 200
+	add_child(overlay)
+	
+	# Create container for text
+	var vbox = VBoxContainer.new()
+	vbox.anchor_left = 0.5
+	vbox.anchor_top = 0.5
+	vbox.anchor_right = 0.5
+	vbox.anchor_bottom = 0.5
+	vbox.offset_left = -300
+	vbox.offset_top = -100
+	vbox.offset_right = 300
+	vbox.offset_bottom = 100
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	overlay.add_child(vbox)
+	
+	# Decay type label
+	var decay_label = Label.new()
+	var decay_text = "α-DECAY" if decay_type == "alpha" else "β-DECAY"
+	decay_label.text = decay_text
+	decay_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	decay_label.add_theme_font_size_override("font_size", 36)
+	decay_label.add_theme_color_override("font_color", Color(1.0, 0.8, 0.2, 1.0))
+	decay_label.modulate = Color(1, 1, 1, 0)
+	vbox.add_child(decay_label)
+	
+	# Current isotope label (will be struck through)
+	var current_label = Label.new()
+	current_label.text = current_name
+	current_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	current_label.add_theme_font_size_override("font_size", 48)
+	current_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9, 1.0))
+	current_label.modulate = Color(1, 1, 1, 0)
+	vbox.add_child(current_label)
+	
+	# Arrow label
+	var arrow_label = Label.new()
+	arrow_label.text = "↓"
+	arrow_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	arrow_label.add_theme_font_size_override("font_size", 60)
+	arrow_label.add_theme_color_override("font_color", Color(0.3, 0.9, 0.5, 1.0))
+	arrow_label.modulate = Color(1, 1, 1, 0)
+	vbox.add_child(arrow_label)
+	
+	# Next isotope label
+	var next_label = Label.new()
+	next_label.text = next_name
+	next_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	next_label.add_theme_font_size_override("font_size", 52)
+	next_label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5, 1.0))
+	next_label.modulate = Color(1, 1, 1, 0)
+	vbox.add_child(next_label)
+	
+	# Strikethrough line for current isotope
+	var strikethrough = ColorRect.new()
+	strikethrough.color = Color(1.0, 0.3, 0.3, 0.9)
+	strikethrough.size = Vector2(0, 4)
+	strikethrough.position = Vector2(0, 0)
+	strikethrough.z_index = 1
+	current_label.add_child(strikethrough)
+	
+	# Animation sequence
+	var seq_tween = create_tween()
+	
+	# 1. Fade in decay type (0.3s)
+	seq_tween.tween_property(decay_label, "modulate:a", 1.0, 0.3)
+	seq_tween.tween_interval(0.2)
+	
+	# 2. Fade in current isotope (0.3s)
+	seq_tween.tween_property(current_label, "modulate:a", 1.0, 0.3)
+	seq_tween.tween_interval(0.3)
+	
+	# 3. Strikethrough animation (0.4s)
+	seq_tween.tween_method(func(width: float):
+		var label_width = current_label.size.x
+		strikethrough.size = Vector2(width, 4)
+		strikethrough.position = Vector2((label_width - width) * 0.5, current_label.size.y * 0.5 - 2)
+	, 0.0, current_label.size.x, 0.4)
+	seq_tween.tween_interval(0.2)
+	
+	# 4. Fade in arrow (0.2s)
+	seq_tween.tween_property(arrow_label, "modulate:a", 1.0, 0.2)
+	seq_tween.tween_interval(0.1)
+	
+	# 5. Fade in next isotope with scale (0.4s)
+	next_label.scale = Vector2(0.8, 0.8)
+	seq_tween.set_parallel(true)
+	seq_tween.tween_property(next_label, "modulate:a", 1.0, 0.4)
+	seq_tween.tween_property(next_label, "scale", Vector2(1.0, 1.0), 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	seq_tween.set_parallel(false)
+	seq_tween.tween_interval(0.6)
+	
+	# 6. Fade out everything (0.3s)
+	seq_tween.tween_property(overlay, "modulate:a", 0.0, 0.3)
+	
+	await seq_tween.finished
+	overlay.queue_free()
 
 func advance_to_next_phase() -> void:
 	is_game_over = false
@@ -352,6 +477,10 @@ func enter_game_over_state(death_cause: String = "Timer expired outside finish a
 func _on_collectible_collected(_collector: Node2D, points: int) -> void:
 	add_score(points)
 	print("Collected! +", points, " points. Total: ", current_score)
+	
+	# Add energy when collecting photons
+	if atom != null:
+		atom.add_energy(energy_per_photon)
 
 func add_score(points: int) -> void:
 	current_score += points
@@ -477,12 +606,32 @@ func _rebuild_goal_visual() -> void:
 	goal_outline.points = outline_points
 	goal_outline.width = clamp(goal_radius * 0.05, 4.0, 18.0)
 
+func _start_blink() -> void:
+	if blink_tween:
+		blink_tween.kill()
+
+	blink_tween = create_tween()
+	blink_tween.set_loops()
+
+	blink_tween.tween_property(goal_status_label, "modulate:a", 0.2, 0.5)
+	blink_tween.tween_property(goal_status_label, "modulate:a", 1.0, 0.5)
+
+func _stop_blink() -> void:
+	if blink_tween:
+		blink_tween.kill()
+		goal_status_label.modulate.a = 1.0
+
 func _update_goal_status(in_finish_area: bool) -> void:
 	if goal_status_label == null:
 		return
 
 	goal_status_label.text = "Finish Area: IN" if in_finish_area else "Finish Area: OUT. Hurry to the area before the timer runs out!"
 	goal_status_label.modulate = Color(0.18, 0.62, 0.22) if in_finish_area else Color(0.82, 0.2, 0.2)
+
+	if in_finish_area:
+		_stop_blink()
+	else:
+		_start_blink()
 
 func _update_goal_guidance(in_finish_area: bool) -> void:
 	if atom == null or goal_arrow == null or goal_distance_label == null or spawn_manager == null:

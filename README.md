@@ -42,10 +42,9 @@ This project uses a **milestone-based approach** with clear verification at each
    ## TODO
    - There should be less photons in the map
    - Green arrival area should be more dangerous
-
-
-   - Swallowing photons should fill an energy bar, fill-amount should be parametrizable. The energy bar should be right below the name of the atom (and thus also follow the atom).
-   - When the user presses the left-mouse button, the speed should be doubled (smooth transition) and when he releases it shold go back to normal speed. As long as it is pressed, the energy bar depletes. If fully depleted, the user can no longer press until the energy is not empty again.
-   - When decaying there should be a proper animation where an atom made out of 2 protons and 2 neutrons is ejected for an alpha decay. For a beta decay there should be a spark or something and an electron should be visually released. Only then (i guess after 2 seconds or so we should transition to the next phase).
    - Work on leaderboard
-   - add sound when mouse enters button
+   - Sometimes photons are not captured
+   - Red Text should blink
+   - Animation should explain what we decayed to.
+
+   - When decaying there should be a proper animation where an atom made out of 2 protons and 2 neutrons is ejected for an alpha decay. For a beta decay there should be a spark or something and an electron should be visually released. Only then (i guess after 2 seconds or so we should transition to the next phase).

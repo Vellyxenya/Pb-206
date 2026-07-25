@@ -40,7 +40,7 @@ func _ready():
 	sprite.play("spawn")
 	sprite.animation_finished.connect(_on_spawn_finished)
 
-func _process(delta):
+func _process(_delta):
 	# Gentle sinusoidal oscillation applied to SPRITE position, not node position
 	var time = Time.get_ticks_msec() / 1000.0 + time_offset
 	oscillation_offset = Vector2(

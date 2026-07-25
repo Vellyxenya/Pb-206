@@ -12,6 +12,12 @@ signal cheat_decay_triggered
 @export var collider_padding: float = -18.0
 @export var electron_shell_spacing: float = 28.0
 @export var electron_orbit_speed: float = 1.2
+@export var max_energy: float = 100.0
+@export var boost_speed_multiplier: float = 3.0
+@export var energy_drain_rate: float = 20.0  # Energy drained per second while boosting
+@export var energy_regen_rate: float = 2.0  # Energy regenerated per second when not boosting
+@export var min_energy_to_boost: float = 1.0  # Minimum energy required to start boosting
+@export var boost_transition_speed: float = 7.0  # Speed of boost lerp transition
 
 var mass_number: int
 var external_force: Vector2 = Vector2.ZERO
@@ -27,6 +33,10 @@ var electrons: Array[Node2D] = []
 var electron_angles: Array[float] = []
 var electron_radii: Array[float] = []
 var orbit_circles: Array[Line2D] = []  # Visual orbit paths
+var current_energy: float = 0.0
+var energy_bar: ProgressBar = null
+var is_boosting: bool = false
+var current_speed_multiplier: float = 1.0
 
 
 func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
@@ -40,14 +50,19 @@ func _ready():
 	gravity_scale = 0.0
 	lock_rotation = true
 	linear_damp = movement_damping
+	
+	# Start with full energy
+	current_energy = max_energy
 
 	load_isotope_data()
 	mass = max(1.0, float(mass_number - 200))
 	spawn_nuclei()
 	_update_charge_visual()  # Initialize visual state
+	_setup_energy_bar()  # Create energy bar
 
 func _process(delta: float) -> void:
 	_update_electron_orbits(delta)
+	_handle_boost_input(delta)
 
 func apply_external_force(force: Vector2):
 	external_force += force
@@ -57,7 +72,9 @@ func drive_towards(world_target: Vector2) -> void:
 	
 	var to_target = world_target - global_position
 	if to_target.length_squared() > mouse_deadzone * mouse_deadzone:
-		apply_central_force(to_target.normalized() * acceleration_force)
+		# Apply current speed multiplier to the force
+		var boosted_force = acceleration_force * current_speed_multiplier
+		apply_central_force(to_target.normalized() * boosted_force)
 
 func _input(event: InputEvent) -> void:
 	# DEBUG: Press 'T' to reduce timer by 10 seconds for quick testing
@@ -116,32 +133,126 @@ func play_decay_effect(decay_type: String) -> void:
 	print("Decay effect: ", decay_type)
 	
 	if decay_type == "alpha":
-		# Alpha decay: eject 4 nuclei (2 protons + 2 neutrons) as "alpha particle"
-		var nuclei = _get_nucleus_nodes()
-		if nuclei.size() >= 4:
-			# Pick 4 random nuclei to eject
-			nuclei.shuffle()
-			for i in range(min(4, nuclei.size())):
-				var nucleus = nuclei[i]
-				if nucleus.has_method("eject_as_alpha"):
-					nucleus.eject_as_alpha()
-		
-		await get_tree().create_timer(0.5).timeout
-		
+		# Alpha decay: eject a visible alpha particle (helium nucleus)
+		await _play_alpha_decay_effect()
 	elif decay_type == "beta":
-		# Beta decay: emit a small electron particle (visual effect)
-		# For now, just a brief flash or pulse
-		print("Beta particle emitted")
-		await get_tree().create_timer(0.3).timeout
+		# Beta decay: eject an electron with spark effect
+		await _play_beta_decay_effect()
 	
-	# Short delay for effect to be visible
-	await get_tree().create_timer(0.2).timeout
+	# Wait a moment before transition
+	await get_tree().create_timer(0.3).timeout
+
+func _play_alpha_decay_effect() -> void:
+	"""Eject an alpha particle (2 protons + 2 neutrons) as a visual cluster"""
+	# Create alpha particle container
+	var alpha_particle = Node2D.new()
+	alpha_particle.name = "AlphaParticle"
+	alpha_particle.global_position = global_position
+	alpha_particle.z_index = 50
+	get_parent().add_child(alpha_particle)
+	
+	# Create 4 nuclei visuals in a tight cluster (2 protons + 2 neutrons)
+	var cluster_positions = [
+		Vector2(-6, -6),
+		Vector2(6, -6),
+		Vector2(-6, 6),
+		Vector2(6, 6)
+	]
+	
+	for i in range(4):
+		var nucleus_visual = Polygon2D.new()
+		nucleus_visual.position = cluster_positions[i]
+		
+		# 2 protons (red), 2 neutrons (blue)
+		var is_proton = (i < 2)
+		var color = Color(0.95, 0.25, 0.25, 0.9) if is_proton else Color(0.3, 0.5, 0.9, 0.9)
+		
+		# Create circular polygon
+		var circle_points: Array[Vector2] = []
+		var radius = 8.0
+		for j in range(16):
+			var angle = (float(j) / 16.0) * TAU
+			circle_points.append(Vector2(cos(angle), sin(angle)) * radius)
+		
+		nucleus_visual.polygon = circle_points
+		nucleus_visual.color = color
+		alpha_particle.add_child(nucleus_visual)
+	
+	# Eject the alpha particle
+	var eject_direction = Vector2.RIGHT.rotated(randf() * TAU)
+	
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(alpha_particle, "global_position", alpha_particle.global_position + eject_direction * 200, 0.8)
+	tween.tween_property(alpha_particle, "modulate:a", 0.0, 0.8)
+	tween.tween_property(alpha_particle, "scale", Vector2(0.5, 0.5), 0.8)
+	await tween.finished
+	
+	alpha_particle.queue_free()
+
+func _play_beta_decay_effect() -> void:
+	"""Eject an electron with spark/flash effect"""
+	# Create flash effect
+	var flash = Polygon2D.new()
+	flash.name = "BetaFlash"
+	flash.global_position = global_position
+	flash.z_index = 50
+	
+	# Create star/spark shape
+	var spark_points: Array[Vector2] = []
+	for i in range(8):
+		var angle = (float(i) / 8.0) * TAU
+		var radius = 30.0 if i % 2 == 0 else 10.0
+		spark_points.append(Vector2(cos(angle), sin(angle)) * radius)
+	
+	flash.polygon = spark_points
+	flash.color = Color(0.3, 0.7, 1.0, 0.8)  # Bright blue
+	get_parent().add_child(flash)
+	
+	# Create electron particle
+	var electron = Polygon2D.new()
+	electron.name = "Electron"
+	electron.global_position = global_position
+	electron.z_index = 51
+	
+	# Small circle for electron
+	var electron_points: Array[Vector2] = []
+	for i in range(12):
+		var angle = (float(i) / 12.0) * TAU
+		electron_points.append(Vector2(cos(angle), sin(angle)) * 6.0)
+	
+	electron.polygon = electron_points
+	electron.color = Color(0.3, 0.7, 1.0, 1.0)
+	get_parent().add_child(electron)
+	
+	# Flash expands and fades quickly
+	var flash_tween = create_tween()
+	flash_tween.set_parallel(true)
+	flash_tween.tween_property(flash, "scale", Vector2(2.0, 2.0), 0.3)
+	flash_tween.tween_property(flash, "modulate:a", 0.0, 0.3)
+	
+	# Electron shoots out
+	var eject_direction = Vector2.RIGHT.rotated(randf() * TAU)
+	var electron_tween = create_tween()
+	electron_tween.set_parallel(true)
+	electron_tween.tween_property(electron, "global_position", electron.global_position + eject_direction * 250, 0.7)
+	electron_tween.tween_property(electron, "modulate:a", 0.0, 0.7)
+	
+	await electron_tween.finished
+	
+	flash.queue_free()
+	electron.queue_free()
 
 func reset_phase_visuals() -> void:
 	_clear_nucleus_nodes()
 	_clear_electrons()
 	_clear_orbit_circles()
 	spawn_nuclei()
+	# Start with full energy on phase transition
+	current_energy = max_energy
+	if energy_bar != null:
+		energy_bar.value = current_energy
+		_update_energy_bar_color()
 
 func get_phase_time_left() -> float:
 	return phase_time_left
@@ -151,6 +262,89 @@ func get_phase_time_total() -> float:
 
 func is_phase_active() -> bool:
 	return phase_active
+
+func _setup_energy_bar() -> void:
+	"""Create and configure the energy bar that follows the atom"""
+	energy_bar = ProgressBar.new()
+	energy_bar.name = "EnergyBar"
+	
+	# Position below the IsotopeNameLabel
+	energy_bar.position = Vector2(-100, -140)
+	energy_bar.size = Vector2(200, 20)
+	energy_bar.min_value = 0.0
+	energy_bar.max_value = max_energy
+	energy_bar.value = current_energy
+	energy_bar.show_percentage = false
+	energy_bar.z_index = 25
+	
+	# Style the energy bar
+	var stylebox = StyleBoxFlat.new()
+	stylebox.bg_color = Color(1.0, 1.0, 0.0, 0.8)  # Start with yellow
+	stylebox.set_corner_radius_all(3)
+	energy_bar.add_theme_stylebox_override("fill", stylebox)
+	
+	# Background style
+	var bg_stylebox = StyleBoxFlat.new()
+	bg_stylebox.bg_color = Color(0.2, 0.2, 0.2, 0.6)
+	bg_stylebox.set_corner_radius_all(3)
+	energy_bar.add_theme_stylebox_override("background", bg_stylebox)
+	
+	add_child(energy_bar)
+
+func add_energy(amount: float) -> void:
+	"""Add energy to the energy bar"""
+	current_energy = min(current_energy + amount, max_energy)
+	if energy_bar != null:
+		energy_bar.value = current_energy
+		_update_energy_bar_color()
+
+func _update_energy_bar_color() -> void:
+	"""Update energy bar color based on fill percentage (yellow -> purple gradient)"""
+	if energy_bar == null:
+		return
+	
+	var fill_ratio = current_energy / max_energy
+	
+	# Interpolate from yellow (1, 1, 0) to purple (0.5, 0, 0.8)
+	var yellow = Color(1.0, 1.0, 0.0, 0.8)
+	var purple = Color(0.5, 0.0, 0.8, 0.8)
+	var current_color = yellow.lerp(purple, fill_ratio)
+	
+	# Update the fill stylebox color
+	var stylebox = energy_bar.get_theme_stylebox("fill")
+	if stylebox is StyleBoxFlat:
+		stylebox.bg_color = current_color
+
+func _handle_boost_input(delta: float) -> void:
+	"""Handle boost mechanic with left mouse button"""
+	# Check if left mouse button is pressed and we have enough energy
+	var wants_to_boost = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	var can_boost = current_energy >= min_energy_to_boost
+	
+	if wants_to_boost and can_boost:
+		is_boosting = true
+		# Drain energy while boosting
+		current_energy = max(0.0, current_energy - energy_drain_rate * delta)
+		if energy_bar != null:
+			energy_bar.value = current_energy
+			_update_energy_bar_color()
+	else:
+		# Can't boost or button released
+		if is_boosting and current_energy <= 0.0:
+			is_boosting = false  # Energy depleted
+		elif not wants_to_boost:
+			is_boosting = false  # Button released
+		
+		# Regenerate energy when not boosting
+		if not is_boosting:
+			current_energy = min(max_energy, current_energy + energy_regen_rate * delta)
+			if energy_bar != null:
+				energy_bar.value = current_energy
+				_update_energy_bar_color()
+	
+	# Smoothly transition speed multiplier
+	var target_multiplier = boost_speed_multiplier if is_boosting else 1.0
+	current_speed_multiplier = lerp(current_speed_multiplier, target_multiplier, boost_transition_speed * delta)
 
 func load_isotope_data():
 	var data = IsotopeData.get_isotope(isotope_key)
