@@ -36,3 +36,15 @@ This project uses a **milestone-based approach** with clear verification at each
    - Complete game design document
    - All mechanics, hazards, and systems
    - Technical implementation details
+
+
+
+   ## TODO
+   - There should be less photons in the map
+   - Green arrival area should be more dangerous
+   - Swallowing photons should fill an energy bar, fill-amount should be parametrizable.
+   - When the user presses the left-mouse button, the speed should be doubled (smooth transition) and when he releases it shold go back to normal speed. As long as it is pressed, the energy bar depletes. If full depleted, the user can no longer press until the energy is not empty again.
+   - When decaying there should be a proper animation where an atom made out of 2 protons and 2 neutrons is ejected for an alpha decay. For a beta decay there should be a spark or something and an electron should be visually released. Only then (i guess after 2 seconds or so we should transition to the next phase).
+   - Should make the main menu more beautiful.
+   - Whenever the score is increased, there should be a quick floating text in yellow color that shows something like "score +x"
+   - Work on leaderboard

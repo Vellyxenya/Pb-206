@@ -2,7 +2,9 @@
 
 [ext_resource type="Script" uid="uid://c6bhfpia8tmhf" path="res://Scripts/main_menu.gd" id="1_mainmenu"]
 [ext_resource type="FontFile" uid="uid://cfw0w3v8xsull" path="res://Assets/Fonts/Quantico/Quantico-Regular.ttf" id="2_48xlc"]
+[ext_resource type="Texture2D" uid="uid://botb65phhq87h" path="res://Assets/main_menu_background.jpeg" id="2_ce3w2"]
 [ext_resource type="AudioStream" uid="uid://wdqeh1kl1j2u" path="res://Assets/Sounds/CyberpunkMoonlightSonata.mp3" id="3_music"]
+[ext_resource type="FontFile" uid="uid://4ham724licbw" path="res://Assets/Fonts/Quantico/Quantico-Bold.ttf" id="3_n45e2"]
 
 [node name="MainMenu" type="Control" unique_id=521885236]
 layout_mode = 3
@@ -22,6 +24,22 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.14304897, 0.21697012, 0.2842265, 1)
 
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1714062562]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -964.0
+offset_top = -760.0
+offset_right = 956.0
+offset_bottom = 723.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ce3w2")
+expand_mode = 3
+
 [node name="Center" type="CenterContainer" parent="." unique_id=569467137]
 layout_mode = 1
 anchors_preset = 15
@@ -37,30 +55,48 @@ alignment = 1
 
 [node name="Title" type="Label" parent="Center/VBox" unique_id=375065300]
 layout_mode = 2
-theme_override_font_sizes/font_size = 72
+theme_override_colors/font_shadow_color = Color(0.61339027, 0.61339027, 0.61339027, 0.94509804)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 8
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("3_n45e2")
+theme_override_font_sizes/font_size = 92
 text = "Pb-206"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Center/VBox" unique_id=857131821]
 layout_mode = 2
-theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(0.95596343, 0.9559633, 0.95596343, 1)
+theme_override_colors/font_shadow_color = Color(0.5568628, 0.5568628, 0.5568628, 0.22745098)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 6
+theme_override_constants/outline_size = 3
+theme_override_fonts/font = ExtResource("3_n45e2")
+theme_override_font_sizes/font_size = 36
 text = "Lead Me Home"
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="Center/VBox" unique_id=1824584736]
-custom_minimum_size = Vector2(0, 18)
+custom_minimum_size = Vector2(0, 100)
 layout_mode = 2
 
 [node name="StartButton" type="Button" parent="Center/VBox" unique_id=1026234577]
 custom_minimum_size = Vector2(280, 56)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("2_48xlc")
+size_flags_horizontal = 4
+theme_override_colors/font_focus_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
+theme_override_colors/font_pressed_color = Color(0.38431373, 0.94509804, 0.23529412, 1)
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
 theme_override_font_sizes/font_size = 24
 text = "Start Run"
 
 [node name="CreditsButton" type="Button" parent="Center/VBox" unique_id=85551215]
 custom_minimum_size = Vector2(280, 56)
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_focus_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
+theme_override_colors/font_pressed_color = Color(0.38431373, 0.94509804, 0.23529412, 1)
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
 theme_override_fonts/font = ExtResource("2_48xlc")
 theme_override_font_sizes/font_size = 24
 text = "Credits"
@@ -68,6 +104,10 @@ text = "Credits"
 [node name="QuitButton" type="Button" parent="Center/VBox" unique_id=25659451]
 custom_minimum_size = Vector2(280, 56)
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_focus_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
+theme_override_colors/font_pressed_color = Color(0.38431373, 0.94509804, 0.23529412, 1)
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
 theme_override_fonts/font = ExtResource("2_48xlc")
 theme_override_font_sizes/font_size = 24
 text = "Quit"

@@ -355,10 +355,39 @@ func _on_collectible_collected(_collector: Node2D, points: int) -> void:
 func add_score(points: int) -> void:
 	current_score += points
 	_update_score_display()
+	
+	# Show floating score text
+	if atom != null:
+		_show_floating_score(points, atom.global_position)
 
 func _update_score_display() -> void:
 	if score_label != null:
 		score_label.text = "Score: " + str(current_score)
+
+func _show_floating_score(points: int, spawn_pos: Vector2) -> void:
+	"""Create a floating text label showing score increase"""
+	var label = Label.new()
+	label.text = "+" + str(points)
+	label.global_position = spawn_pos + Vector2(-20, -30)  # Offset above the atom
+	label.z_index = 100  # Ensure it's on top
+	
+	# Style the label
+	label.add_theme_color_override("font_color", Color.ORANGE)
+	label.add_theme_font_size_override("font_size", 46)
+
+	# Outline
+	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	label.add_theme_constant_override("outline_size", 3)
+	
+	add_child(label)
+	
+	# Animate: float up and fade out
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(label, "global_position:y", spawn_pos.y - 80, 1.0).set_ease(Tween.EASE_OUT)
+	tween.tween_property(label, "modulate:a", 0.0, 1.0).set_ease(Tween.EASE_IN)
+	tween.set_parallel(false)
+	tween.tween_callback(label.queue_free)  # Delete when done
 
 func on_player_neutrino_death() -> void:
 	"""Called when a neutrino hits the player"""
