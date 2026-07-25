@@ -10,6 +10,9 @@ signal cheat_decay_triggered
 @export var movement_damping: float = 1.1
 @export var mouse_deadzone: float = 20.0
 @export var collider_padding: float = -18.0
+@export var electron_base_radius: float = 50.0
+@export var electron_shell_spacing: float = 28.0
+@export var electron_orbit_speed: float = 1.2
 
 var mass_number: int
 var external_force: Vector2 = Vector2.ZERO
@@ -20,6 +23,11 @@ var isotope_name: String = ""
 var disk_radius: float = 0.0
 var proton_tint: Color = Color.WHITE
 var charge: int = 0  # 0 = neutral, +1 = positively charged (after β-decay)
+var collision_radius: float = 0.0  # Stores the atom's collision shape radius
+var electrons: Array[Node2D] = []
+var electron_angles: Array[float] = []
+var electron_radii: Array[float] = []
+var orbit_circles: Array[Line2D] = []  # Visual orbit paths
 
 
 func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
@@ -38,6 +46,9 @@ func _ready():
 	mass = max(1.0, float(mass_number - 200))
 	spawn_nuclei()
 	_update_charge_visual()  # Initialize visual state
+
+func _process(delta: float) -> void:
+	_update_electron_orbits(delta)
 
 func apply_external_force(force: Vector2):
 	external_force += force
@@ -129,6 +140,8 @@ func play_decay_effect(decay_type: String) -> void:
 
 func reset_phase_visuals() -> void:
 	_clear_nucleus_nodes()
+	_clear_electrons()
+	_clear_orbit_circles()
 	spawn_nuclei()
 
 func get_phase_time_left() -> float:
@@ -205,6 +218,9 @@ func spawn_nuclei():
 		nucleus.position = hex_positions[i]
 		nucleus.set_type(nucleus_types[i], proton_tint)
 		add_child(nucleus)
+	
+	# Spawn electrons based on visible proton count
+	spawn_electrons(visible_protons)
 
 func _setup_collision_shape(hex_positions: Array[Vector2]) -> void:
 	var max_dist := 0.0
@@ -212,6 +228,7 @@ func _setup_collision_shape(hex_positions: Array[Vector2]) -> void:
 		max_dist = max(max_dist, pos.length())
 
 	var radius = max_dist + collider_padding
+	collision_radius = radius  # Store for electron orbit calculations
 	var collision_shape = get_node_or_null("CollisionShape2D") as CollisionShape2D
 	if collision_shape == null:
 		collision_shape = CollisionShape2D.new()
@@ -248,3 +265,137 @@ func _update_charge_visual() -> void:
 			charge_label.visible = true
 		else:
 			charge_label.visible = false
+
+func spawn_electrons(electron_count: int) -> void:
+	"""Spawn electrons in orbital shells around the atom"""
+	_clear_electrons()
+	_clear_orbit_circles()
+	
+	if electron_count <= 0:
+		return
+	
+	# Define electron shell capacities: 2, 8, 8, 18, 18, ...
+	var shell_capacities: Array[int] = [2, 8, 8, 18, 18, 32]
+	var electrons_remaining = electron_count
+	var shell_index = 0
+	
+	# Base radius is collision radius + 20
+	var base_orbit_radius = collision_radius + 20.0
+	
+	while electrons_remaining > 0 and shell_index < shell_capacities.size():
+		var electrons_in_shell = min(electrons_remaining, shell_capacities[shell_index])
+		var shell_radius = base_orbit_radius + (shell_index * electron_shell_spacing)
+		
+		# Create orbit circle for this shell
+		_create_orbit_circle(shell_radius)
+		
+		# Calculate angles for paired electrons
+		var pair_count = int(ceil(float(electrons_in_shell) / 2.0))
+		var pair_separation = 6.0  # Degrees between paired electrons
+		
+		# Distribute electron pairs evenly around the shell
+		for i in range(electrons_in_shell):
+			var pair_index = int(i / 2)
+			var is_second_in_pair = (i % 2) == 1
+			
+			# Base angle for this pair
+			var base_angle = (TAU * float(pair_index)) / float(pair_count)
+			
+			# Offset slightly for pairing effect
+			var angle_offset = 0.0
+			if is_second_in_pair:
+				angle_offset = deg_to_rad(pair_separation)
+			else:
+				angle_offset = -deg_to_rad(pair_separation)
+			
+			var angle = base_angle + angle_offset
+			_spawn_electron(shell_radius, angle)
+		
+		electrons_remaining -= electrons_in_shell
+		shell_index += 1
+	
+	print("Spawned ", electron_count, " electrons across ", shell_index, " shells")
+
+func _spawn_electron(radius: float, initial_angle: float) -> void:
+	"""Create a single electron at the given radius and angle"""
+	var electron = Node2D.new()
+	electron.z_index = 15  # Draw above nucleus but below UI
+	add_child(electron)
+	
+	# Create visual circle for electron
+	var visual = Polygon2D.new()
+	var electron_size = 4.0
+	var circle_points: PackedVector2Array = []
+	var segments = 12
+	for i in range(segments):
+		var angle = (TAU * float(i)) / float(segments)
+		circle_points.append(Vector2(cos(angle), sin(angle)) * electron_size)
+	visual.polygon = circle_points
+	visual.color = Color(0.3, 0.7, 1.0, 0.9)  # Light blue electron
+	electron.add_child(visual)
+	
+	# Add a glow effect
+	var glow = Polygon2D.new()
+	var glow_points: PackedVector2Array = []
+	for i in range(segments):
+		var angle = (TAU * float(i)) / float(segments)
+		glow_points.append(Vector2(cos(angle), sin(angle)) * (electron_size * 1.8))
+	glow.polygon = glow_points
+	glow.color = Color(0.4, 0.8, 1.0, 0.3)  # Semi-transparent glow
+	glow.z_index = -1
+	electron.add_child(glow)
+	
+	electrons.append(electron)
+	electron_angles.append(initial_angle)
+	electron_radii.append(radius)
+
+func _create_orbit_circle(radius: float) -> void:
+	"""Create a visual orbit circle at the given radius"""
+	var orbit = Line2D.new()
+	orbit.z_index = 10  # Below electrons
+	orbit.width = 1.0
+	orbit.default_color = Color(0.4, 0.6, 0.8, 0.25)  # Semi-transparent blue-gray
+	orbit.antialiased = true
+	
+	# Create circle points
+	var segments = 64
+	var points: PackedVector2Array = []
+	for i in range(segments + 1):
+		var angle = (TAU * float(i)) / float(segments)
+		points.append(Vector2(cos(angle), sin(angle)) * radius)
+	orbit.points = points
+	
+	add_child(orbit)
+	orbit_circles.append(orbit)
+
+func _update_electron_orbits(delta: float) -> void:
+	"""Update electron positions to orbit around the atom"""
+	for i in range(electrons.size()):
+		if i >= electron_angles.size() or i >= electron_radii.size():
+			continue
+		
+		# Update angle
+		electron_angles[i] += electron_orbit_speed * delta
+		if electron_angles[i] > TAU:
+			electron_angles[i] -= TAU
+		
+		# Update position
+		var radius = electron_radii[i]
+		var angle = electron_angles[i]
+		electrons[i].position = Vector2(cos(angle), sin(angle)) * radius
+
+func _clear_electrons() -> void:
+	"""Remove all electrons"""
+	for electron in electrons:
+		if is_instance_valid(electron):
+			electron.queue_free()
+	electrons.clear()
+	electron_angles.clear()
+	electron_radii.clear()
+
+func _clear_orbit_circles() -> void:
+	"""Remove all orbit circle visuals"""
+	for orbit in orbit_circles:
+		if is_instance_valid(orbit):
+			orbit.queue_free()
+	orbit_circles.clear()
