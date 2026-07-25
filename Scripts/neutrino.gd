@@ -2,8 +2,8 @@ extends Area2D
 
 ## Neutrino - a fast-moving hazard with visible trajectory
 
-@export var speed: float = 400.0
-@export var trajectory_line_duration: float = 5.0
+@export var speed: float = 450.0
+@export var trajectory_line_duration: float = 3.0
 @export var visual_radius: float = 14.0
 
 var direction: Vector2 = Vector2.RIGHT

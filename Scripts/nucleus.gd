@@ -15,6 +15,7 @@ var oscillation_amplitude := 3.0  # pixels
 var time_offset: float
 var proton_tint: Color = Color(0.95, 0.25, 0.25)
 var is_destroying: bool = false
+@onready var charge_indicator = $AnimatedSprite2D/ChargeIndicator
 
 func _ready():
 	add_to_group("nucleus_visual")
@@ -56,6 +57,7 @@ func _on_spawn_finished():
 
 	if nucleus_type == NucleusType.PROTON:
 		sprite.play("proton")
+		charge_indicator.visible = true
 	else:
 		sprite.play("neutron")
 
@@ -63,6 +65,7 @@ func play_destroy_animation() -> void:
 	if sprite == null:
 		return
 
+	charge_indicator.visible = false
 	is_destroying = true
 	oscillation_amplitude = 0.0
 	if sprite.sprite_frames != null and sprite.sprite_frames.has_animation("destroy"):

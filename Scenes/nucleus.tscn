@@ -155,3 +155,18 @@ material = SubResource("ShaderMaterial_47j3p")
 sprite_frames = SubResource("SpriteFrames_sfggm")
 animation = &"spawn"
 autoplay = "spawn"
+
+[node name="ChargeIndicator" type="Label" parent="AnimatedSprite2D" unique_id=2082943904]
+visible = false
+z_index = 30
+offset_left = -12.0
+offset_top = -14.0
+offset_right = 13.0
+offset_bottom = 12.0
+theme_override_colors/font_color = Color(0.64953834, 0, 0.09438831, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 22
+text = "+"
+horizontal_alignment = 1
+vertical_alignment = 1

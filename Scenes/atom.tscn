@@ -48,10 +48,10 @@ vertical_alignment = 1
 [node name="ChargeIndicator" type="Label" parent="." unique_id=344552022]
 visible = false
 z_index = 30
-offset_left = 45.0
-offset_top = -55.0
-offset_right = 85.0
-offset_bottom = -15.0
+offset_left = 106.0
+offset_top = -194.0
+offset_right = 146.0
+offset_bottom = -149.0
 theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
