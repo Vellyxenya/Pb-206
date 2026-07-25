@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://1n227odevv75" path="res://Scripts/game.gd" id="2_gamescript"]
 [ext_resource type="FontFile" uid="uid://4ham724licbw" path="res://Assets/Fonts/Quantico/Quantico-Bold.ttf" id="2_i6g32"]
 [ext_resource type="Script" uid="uid://bbw1t7mpty6we" path="res://Scripts/world_background.gd" id="3_backgroundscript"]
+[ext_resource type="PackedScene" uid="uid://dxw8vh5n3b4p" path="res://Scenes/SpawnManager.tscn" id="4_spawn"]
 [ext_resource type="PackedScene" uid="uid://c6w7d5q1dqo1t" path="res://Scenes/ProtonField.tscn" id="4_wowpa"]
 [ext_resource type="PackedScene" uid="uid://b5yqjgm1q1w8t" path="res://Scenes/ElectronField.tscn" id="5_i6g32"]
 
@@ -160,6 +161,8 @@ antialiased = true
 [node name="Hazards" type="Node2D" parent="." unique_id=2085012273]
 
 [node name="Collectibles" type="Node2D" parent="." unique_id=281913840]
+
+[node name="SpawnManager" parent="." unique_id=1085012274 instance=ExtResource("4_spawn")]
 
 [node name="Background" type="Node2D" parent="." unique_id=1970185643]
 z_index = -10

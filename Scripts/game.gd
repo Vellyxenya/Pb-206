@@ -1,53 +1,20 @@
 extends Node2D
 
-@export var goal_position: Vector2 = Vector2(2720.0, 1900.0)
 @export var goal_radius: float = 1200.0
 @export var goal_arrow_padding: float = 42.0
 @export var transition_duration: float = 0.8
 @export var goal_margin: float = 220.0
 @export var game_over_time_scale: float = 0.22
-@export var min_goal_edge_distance: float = 900.0
-@export var max_goal_center_distance: float = 5200.0
-@export var neutron_field_count: int = 3
-@export var neutron_field_radius: float = 240.0
-@export var neutron_bleep_interval: float = 2.2
-@export var neutron_kill_chance: float = 0.28
-@export var hazard_min_goal_distance: float = 360.0
-@export var hazard_min_player_distance: float = 820.0
-@export var hazard_view_margin: float = 120.0
-@export var neutron_fill_base_color: Color = Color(1.0, 0.55, 0.12, 0.16)
-@export var neutron_fill_charge_color: Color = Color(1.0, 0.72, 0.22, 0.42)
-@export var neutron_ring_base_color: Color = Color(1.0, 0.58, 0.18, 0.72)
-@export var neutron_ring_charge_color: Color = Color(1.0, 0.78, 0.28, 1.0)
-
-@export var hazard_scenes: Array[PackedScene] = [
-	preload("res://Scenes/ProtonField.tscn"),
-	preload("res://Scenes/ElectronField.tscn")
-]
-@export var force_field_count: int = 2
-@export var photon_count: int = 45
-@export var neutrino_count: int = 30
-@export var neutrino_speed_min: float = 300.0
-@export var neutrino_speed_max: float = 500.0
 @export var points_per_second_in_goal: float = 2.0
-@export var spawn_area_radius: float = 4000.0
 
 const GOAL_VISUAL_SEGMENTS: int = 64
-const PhotonScene = preload("res://Scenes/photon.tscn")
-const NeutrinoScene = preload("res://Scenes/neutrino.tscn")
 
 var is_transitioning: bool = false
 var is_game_over: bool = false
 var starting_isotope_key: String = ""
 var current_phase_index: int = 1
 var current_score: int = 0
-var _bleep_time_left: float = 0.0
 var _goal_bonus_accumulator: float = 0.0
-var neutron_fields: Array[Area2D] = []
-var force_fields: Array[Area2D] = []
-var collectibles: Array[Area2D] = []
-var neutrinos: Array[Area2D] = []
-var active_neutron_fields: Dictionary = {}
 var lucky_popup_tween: Tween
 var phase_sounds: Array[AudioStream] = []
 var phase_audio_player: AudioStreamPlayer
@@ -71,9 +38,15 @@ var phase_audio_player: AudioStreamPlayer
 @onready var goal_distance_label: Label = $Player/Atom/GoalDistanceLabel
 @onready var hazards_root: Node2D = $Hazards
 @onready var collectibles_root: Node2D = $Collectibles
+@onready var spawn_manager: Node2D = $SpawnManager
 
 func _ready() -> void:
 	add_to_group("game")  # Allow hazards to find the game node
+	
+	# Setup spawn manager
+	if spawn_manager != null:
+		spawn_manager.setup_references(atom, camera, hazards_root, collectibles_root)
+		spawn_manager.goal_radius = goal_radius
 	
 	if atom != null:
 		starting_isotope_key = atom.isotope_key
@@ -97,9 +70,11 @@ func _ready() -> void:
 	_play_sound_for_phase(current_phase_index)
 
 	_rebuild_goal_visual()
-	randomize_goal_position()
-	spawn_hazards()
-	spawn_collectibles()
+	
+	# Spawn initial entities
+	if spawn_manager != null:
+		spawn_manager.spawn_initial_entities()
+		spawn_manager.connect_photon_signals(self)
 	_update_goal_area_visual()
 	_update_goal_status(false)
 	_update_goal_guidance(false)
@@ -143,25 +118,11 @@ func _process(_delta):
 			_goal_bonus_accumulator -= float(points_to_add)
 			add_score(points_to_add)
 
-func _physics_process(delta: float) -> void:
-	if is_transitioning or is_game_over:
-		return
-	if atom == null or neutron_fields.is_empty():
-		return
-
-	_bleep_time_left -= delta
-	_update_neutron_field_visuals()
-	if _bleep_time_left > 0.0:
-		return
-
-	_bleep_time_left = max(neutron_bleep_interval, 0.2)
-	run_neutron_bleep()
-
 func is_atom_in_finish_area() -> bool:
-	if atom == null:
+	if atom == null or spawn_manager == null:
 		return false
 
-	return atom.global_position.distance_to(goal_position) <= goal_radius
+	return atom.global_position.distance_to(spawn_manager.goal_position) <= goal_radius
 
 func _on_atom_phase_timer_finished() -> void:
 	if atom == null:
@@ -214,23 +175,6 @@ func play_transition_flash(success: bool) -> void:
 	await tween.finished
 	transition_flash.visible = false
 
-func randomize_goal_position() -> void:
-	var center = atom.global_position if atom != null else Vector2.ZERO
-	var min_center_distance = goal_radius + max(min_goal_edge_distance, 0.0)
-	var max_center_distance = max(max_goal_center_distance, min_center_distance + 300.0)
-
-	var best_position = center + Vector2.RIGHT * max_center_distance
-	for _attempt in range(48):
-		var direction = Vector2.from_angle(randf() * TAU)
-		var distance = randf_range(min_center_distance, max_center_distance)
-		var candidate = center + direction * distance
-		if candidate.distance_to(center) > min_center_distance:
-			goal_position = candidate
-			return
-		best_position = candidate
-
-	goal_position = best_position
-
 func advance_to_next_phase() -> void:
 	is_game_over = false
 	Engine.time_scale = 1.0
@@ -268,9 +212,10 @@ func advance_to_next_phase() -> void:
 		current_phase_index += 1
 	_play_sound_for_phase(current_phase_index)
 
-	randomize_goal_position()
-	spawn_hazards()
-	spawn_collectibles()
+	if spawn_manager != null:
+		spawn_manager.clear_all_entities()
+		spawn_manager.spawn_initial_entities()
+		spawn_manager.connect_photon_signals(self)
 	if atom != null:
 		atom.load_isotope_data()
 		atom.reset_phase_visuals()
@@ -300,9 +245,10 @@ func restart_current_phase() -> void:
 	current_phase_index = 1
 	_play_sound_for_phase(current_phase_index)
 
-	randomize_goal_position()
-	spawn_hazards()
-	spawn_collectibles()
+	if spawn_manager != null:
+		spawn_manager.clear_all_entities()
+		spawn_manager.spawn_initial_entities()
+		spawn_manager.connect_photon_signals(self)
 	if atom != null:
 		atom.set_charge(0)  # Reset to neutral on restart
 		atom.load_isotope_data()
@@ -316,40 +262,6 @@ func enter_game_over_state(death_cause: String = "Timer expired outside finish a
 	if game_over_title != null:
 		game_over_title.text = "GAME OVER\n" + death_cause
 
-func spawn_hazards() -> void:
-	spawn_neutron_fields()
-	spawn_force_fields()
-	spawn_neutrinos()
-
-func spawn_collectibles() -> void:
-	clear_collectibles()
-	if collectibles_root == null or atom == null:
-		return
-	
-	var photons_to_spawn = max(photon_count, 0)
-	print("Spawning ", photons_to_spawn, " photons")
-	for _i in range(photons_to_spawn):
-		var photon = PhotonScene.instantiate()
-		photon.position = _pick_collectible_position()
-		photon.move_direction = Vector2.from_angle(randf() * TAU).normalized()
-		photon.collected.connect(_on_collectible_collected)
-		collectibles_root.add_child(photon)
-		collectibles.append(photon)
-	print("Photons spawned: ", collectibles.size())
-
-func clear_collectibles() -> void:
-	for collectible in collectibles:
-		if is_instance_valid(collectible):
-			collectible.queue_free()
-	collectibles.clear()
-
-func _pick_collectible_position() -> Vector2:
-	"""Pick a random position for collectibles, spread widely across the map"""
-	var center = atom.global_position if atom != null else Vector2.ZERO
-	var angle = randf() * TAU
-	var distance = randf_range(200.0, spawn_area_radius)
-	return center + Vector2.from_angle(angle) * distance
-
 func _on_collectible_collected(_collector: Node2D, points: int) -> void:
 	add_score(points)
 	print("Collected! +", points, " points. Total: ", current_score)
@@ -362,79 +274,6 @@ func _update_score_display() -> void:
 	if score_label != null:
 		score_label.text = "Score: " + str(current_score)
 
-func spawn_force_fields() -> void:
-	clear_force_fields()
-	if hazards_root == null or atom == null or hazard_scenes.is_empty():
-		return
-
-	var fields_to_make = max(force_field_count, 0)
-	for _i in fields_to_make:
-		var scene = hazard_scenes.pick_random()
-		var field = scene.instantiate()
-		field.position = _pick_hazard_position()
-		hazards_root.add_child(field)
-		force_fields.append(field)
-
-func spawn_neutron_fields() -> void:
-	clear_neutron_fields()
-	if hazards_root == null or atom == null:
-		return
-
-	var fields_to_make = max(neutron_field_count, 0)
-	for _idx in range(fields_to_make):
-		var field = _create_neutron_field(neutron_field_radius)
-		field.position = _pick_hazard_position()
-		hazards_root.add_child(field)
-		neutron_fields.append(field)
-
-	_bleep_time_left = max(neutron_bleep_interval, 0.2)
-
-func clear_neutron_fields() -> void:
-	for field in neutron_fields:
-		if is_instance_valid(field):
-			field.queue_free()
-	neutron_fields.clear()
-	active_neutron_fields.clear()
-
-func clear_force_fields() -> void:
-	for field in force_fields:
-		if is_instance_valid(field):
-			field.queue_free()
-	force_fields.clear()
-
-func spawn_neutrinos() -> void:
-	clear_neutrinos()
-	if hazards_root == null or atom == null:
-		return
-	
-	var neutrinos_to_spawn = max(neutrino_count, 0)
-	print("Spawning ", neutrinos_to_spawn, " neutrinos")
-	for _i in range(neutrinos_to_spawn):
-		var neutrino = NeutrinoScene.instantiate()
-		neutrino.position = _pick_neutrino_spawn_position()
-		neutrino.speed = randf_range(neutrino_speed_min, neutrino_speed_max)
-		
-		# Set direction towards a random point that might intersect with gameplay area
-		var direction_angle = randf() * TAU
-		neutrino.set_direction(Vector2.from_angle(direction_angle))
-		
-		hazards_root.add_child(neutrino)
-		neutrinos.append(neutrino)
-	print("Neutrinos spawned: ", neutrinos.size())
-
-func clear_neutrinos() -> void:
-	for neutrino in neutrinos:
-		if is_instance_valid(neutrino):
-			neutrino.queue_free()
-	neutrinos.clear()
-
-func _pick_neutrino_spawn_position() -> Vector2:
-	"""Pick a spawn position for neutrinos at the edge of the play area"""
-	var center = atom.global_position if atom != null else Vector2.ZERO
-	var angle = randf() * TAU
-	var distance = spawn_area_radius * 1.2  # Spawn outside main area
-	return center + Vector2.from_angle(angle) * distance
-
 func on_player_neutrino_death() -> void:
 	"""Called when a neutrino hits the player"""
 	print("Player hit by neutrino!")
@@ -442,183 +281,17 @@ func on_player_neutrino_death() -> void:
 		await atom.play_destroy_animation()
 	enter_game_over_state("Destroyed by neutrino collision!")
 
-func _create_neutron_field(radius: float) -> Area2D:
-	var field := Area2D.new()
-	field.name = "NeutronField"
-	field.monitoring = true
-	field.collision_mask = 1
-	field.body_entered.connect(_on_neutron_field_body_entered.bind(field))
-	field.body_exited.connect(_on_neutron_field_body_exited.bind(field))
+func on_player_neutron_death_from_field() -> void:
+	"""Called by spawn_manager when neutron field kills player"""
+	start_phase_transition(false, "Neutron field spike")
 
-	var collision := CollisionShape2D.new()
-	var circle := CircleShape2D.new()
-	circle.radius = radius
-	collision.shape = circle
-	field.add_child(collision)
-
-	var ring_points := PackedVector2Array()
-	var fill_points := PackedVector2Array()
-	const SEGMENTS := 40
-	for i in range(SEGMENTS):
-		var angle = (float(i) / float(SEGMENTS)) * TAU
-		var point = Vector2.from_angle(angle) * radius
-		ring_points.append(point)
-		fill_points.append(point)
-	ring_points.append(ring_points[0])
-
-	var fill := Polygon2D.new()
-	fill.polygon = fill_points
-	fill.color = neutron_fill_base_color
-	field.add_child(fill)
-
-	var ring := Line2D.new()
-	ring.points = ring_points
-	ring.width = 7.0
-	ring.default_color = neutron_ring_base_color
-	ring.antialiased = true
-	field.add_child(ring)
-
-	field.set_meta("hazard_fill", fill)
-	field.set_meta("hazard_ring", ring)
-
-	return field
-
-func _on_neutron_field_body_entered(body: Node, field: Area2D) -> void:
-	if atom == null or field == null:
+func show_lucky_popup() -> void:
+	"""Called by spawn_manager when player survives neutron field"""
+	if atom == null or lucky_popup_label == null:
 		return
-	if body == atom:
-		active_neutron_fields[field.get_instance_id()] = field
-
-func _on_neutron_field_body_exited(body: Node, field: Area2D) -> void:
-	if atom == null or field == null:
-		return
-	if body == atom:
-		active_neutron_fields.erase(field.get_instance_id())
-
-func _pick_hazard_position() -> Vector2:
-	var center = atom.global_position if atom != null else Vector2.ZERO
-	var view_center = camera.global_position if camera != null else center
-	var viewport_size = get_viewport_rect().size
-	var half_view = viewport_size * 0.5
-	var margin = max(hazard_view_margin, neutron_field_radius + 24.0)
-
-	var min_x = view_center.x - half_view.x + margin
-	var max_x = view_center.x + half_view.x - margin
-	var min_y = view_center.y - half_view.y + margin
-	var max_y = view_center.y + half_view.y - margin
-
-	var min_player_dist = max(hazard_min_player_distance + neutron_field_radius, 120.0)
-	var min_goal_dist = goal_radius + neutron_field_radius + max(hazard_min_goal_distance, 0.0)
-	var max_player_dist = max(min(half_view.x, half_view.y) - margin, min_player_dist + 40.0)
-	max_player_dist = max(max_player_dist, min_player_dist + 40.0)
-
-	for _attempt in range(180):
-		var angle = randf() * TAU
-		var dist = randf_range(min_player_dist, max_player_dist)
-		var candidate = center + Vector2.from_angle(angle) * dist
-		candidate.x = clamp(candidate.x, min_x, max_x)
-		candidate.y = clamp(candidate.y, min_y, max_y)
-
-		if candidate.distance_to(center) < min_player_dist:
-			continue
-		if candidate.distance_to(goal_position) < min_goal_dist:
-			continue
-		return candidate
-
-	# Fallback still guarantees distance from player, even if goal-separation can't be satisfied.
-	var away_from_player = (view_center - center).normalized()
-	if away_from_player.length_squared() < 0.01:
-		away_from_player = Vector2.RIGHT
-	var fallback = center + away_from_player * min_player_dist
-	fallback.x = clamp(fallback.x, min_x, max_x)
-	fallback.y = clamp(fallback.y, min_y, max_y)
-
-	# Keep minimum distance from player after viewport clamping.
-	var to_fallback = fallback - center
-	if to_fallback.length() < min_player_dist:
-		to_fallback = to_fallback.normalized() if to_fallback.length_squared() > 0.001 else Vector2.RIGHT
-		fallback = center + to_fallback * min_player_dist
-		fallback.x = clamp(fallback.x, min_x, max_x)
-		fallback.y = clamp(fallback.y, min_y, max_y)
-
-	return fallback
-
-func run_neutron_bleep() -> void:
-	if atom == null or neutron_fields.is_empty():
-		return
-
-	var survived_inside_field = false
-	for field in neutron_fields:
-		if not is_instance_valid(field):
-			continue
-
-		var active_by_trigger = active_neutron_fields.has(field.get_instance_id())
-		var active_by_distance = is_atom_inside_field(field)
-		if not active_by_trigger and not active_by_distance:
-			continue
-
-		if randf() <= clamp(neutron_kill_chance, 0.0, 1.0):
-			start_phase_transition(false, "Neutron field spike")
-			return
-		survived_inside_field = true
-
-	if survived_inside_field:
-		show_lucky_popup(atom.global_position + Vector2(0.0, -80.0))
-
-func _update_neutron_field_visuals() -> void:
-	if neutron_fields.is_empty():
-		return
-
-	var interval = max(neutron_bleep_interval, 0.2)
-	var time_left = clamp(_bleep_time_left, 0.0, interval)
-	var charge = 1.0 - (time_left / interval)
-
-	for field in neutron_fields:
-		if not is_instance_valid(field):
-			continue
-
-		var fill = field.get_meta("hazard_fill", null) as Polygon2D
-		if fill != null:
-			fill.color = neutron_fill_base_color.lerp(neutron_fill_charge_color, charge)
-
-		var ring = field.get_meta("hazard_ring", null) as Line2D
-		if ring != null:
-			ring.default_color = neutron_ring_base_color.lerp(neutron_ring_charge_color, charge)
-
-func is_atom_inside_field(field: Area2D) -> bool:
-	if atom == null or field == null:
-		return false
-
-	var collision = field.get_node_or_null("CollisionShape2D") as CollisionShape2D
-	if collision == null:
-		return false
-
-	var circle = collision.shape as CircleShape2D
-	if circle == null:
-		return false
-
-	# Include atom body radius so touching the field counts as being inside it.
-	var atom_radius = _get_atom_collision_radius()
-	return atom.global_position.distance_to(field.global_position) <= circle.radius + atom_radius
-
-func _get_atom_collision_radius() -> float:
-	if atom == null:
-		return 0.0
-
-	var atom_collision = atom.get_node_or_null("CollisionShape2D") as CollisionShape2D
-	if atom_collision == null:
-		return 0.0
-
-	var atom_circle = atom_collision.shape as CircleShape2D
-	if atom_circle == null:
-		return 0.0
-
-	return atom_circle.radius
-
-func show_lucky_popup(world_pos: Vector2) -> void:
-	if lucky_popup_label == null:
-		return
-
+	
+	var world_pos = atom.global_position + Vector2(0.0, -80.0)
+	
 	if lucky_popup_tween != null:
 		lucky_popup_tween.kill()
 
@@ -646,8 +319,8 @@ func _on_main_menu_pressed() -> void:
 		get_tree().quit()
 
 func _update_goal_area_visual() -> void:
-	if goal_area != null:
-		goal_area.global_position = goal_position
+	if goal_area != null and spawn_manager != null:
+		goal_area.global_position = spawn_manager.goal_position
 
 func _rebuild_goal_visual() -> void:
 	if goal_fill == null or goal_outline == null:
@@ -676,11 +349,11 @@ func _update_goal_status(in_finish_area: bool) -> void:
 	goal_status_label.modulate = Color(0.18, 0.62, 0.22) if in_finish_area else Color(0.82, 0.2, 0.2)
 
 func _update_goal_guidance(in_finish_area: bool) -> void:
-	if atom == null or goal_arrow == null or goal_distance_label == null:
+	if atom == null or goal_arrow == null or goal_distance_label == null or spawn_manager == null:
 		return
 
 	var timer_active = atom.has_method("is_phase_active") and atom.is_phase_active()
-	var to_goal = goal_position - atom.global_position
+	var to_goal = spawn_manager.goal_position - atom.global_position
 	var distance = to_goal.length()
 	var edge_distance = max(distance - goal_radius, 0.0)
 	var show_guidance = timer_active and not is_transitioning and not is_game_over and not in_finish_area and distance > 1.0

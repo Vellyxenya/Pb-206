@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://dxw8vh5n3b4p"]
+
+[ext_resource type="Script" path="res://Scripts/SpawnManager.gd" id="1_spawn"]
+[ext_resource type="PackedScene" uid="uid://c6w7d5q1dqo1t" path="res://Scenes/ProtonField.tscn" id="2_proton"]
+[ext_resource type="PackedScene" uid="uid://b5yqjgm1q1w8t" path="res://Scenes/ElectronField.tscn" id="3_electron"]
+
+[node name="SpawnManager" type="Node2D"]
+script = ExtResource("1_spawn")
+hazard_scenes = Array[PackedScene]([ExtResource("2_proton"), ExtResource("3_electron")])
