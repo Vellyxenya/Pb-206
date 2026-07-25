@@ -8,7 +8,7 @@ signal phase_timer_finished
 @export var acceleration_force: float = 5400.0
 @export var movement_damping: float = 1.1
 @export var mouse_deadzone: float = 12.0
-@export var collider_padding: float = 18.0
+@export var collider_padding: float = -18.0
 
 var mass_number: int
 var external_force: Vector2 = Vector2.ZERO

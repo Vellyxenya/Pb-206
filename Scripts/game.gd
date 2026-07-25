@@ -63,6 +63,8 @@ func _ready() -> void:
 		lucky_popup_label.visible = false
 	Engine.time_scale = 1.0
 	
+	goal_distance_label.modulate = Color(0.0, 0.0, 0.0, 1.0)
+	
 	current_score = 0
 	_update_score_display()
 
@@ -367,7 +369,11 @@ func _update_goal_guidance(in_finish_area: bool) -> void:
 	var arrow_offset = direction * _get_goal_arrow_distance()
 	goal_arrow.position = arrow_offset
 	goal_arrow.rotation = direction.angle() + PI / 2.0
-	goal_distance_label.position = arrow_offset + direction * 42.0 + Vector2(-22.0, -10.0)
+	
+	# Position label at arrow tip + extra distance, centered on that point
+	# Label dimensions: 100x26 pixels, so offset by (-50, -13) to center
+	var label_center = arrow_offset + direction * 60.0
+	goal_distance_label.position = label_center + Vector2(-50.0, -13.0)
 	goal_distance_label.text = str(int(round(edge_distance / 10.0)))
 
 func _get_goal_arrow_distance() -> float:

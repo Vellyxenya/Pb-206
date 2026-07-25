@@ -3,7 +3,6 @@
 [ext_resource type="Script" path="res://Scripts/neutrino.gd" id="1_neutrino"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_neutrino"]
-radius = 14.0
 
 [node name="Neutrino" type="Area2D" unique_id=1791135697 groups=["hazards", "neutrinos"]]
 collision_layer = 16
