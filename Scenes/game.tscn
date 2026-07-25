@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://1n227odevv75" path="res://Scripts/game.gd" id="2_gamescript"]
 [ext_resource type="FontFile" uid="uid://4ham724licbw" path="res://Assets/Fonts/Quantico/Quantico-Bold.ttf" id="2_i6g32"]
 [ext_resource type="Script" uid="uid://bbw1t7mpty6we" path="res://Scripts/world_background.gd" id="3_backgroundscript"]
-[ext_resource type="PackedScene" uid="uid://dxw8vh5n3b4p" path="res://Scenes/SpawnManager.tscn" id="4_spawn"]
+[ext_resource type="PackedScene" path="res://Scenes/SpawnManager.tscn" id="4_spawn"]
 [ext_resource type="PackedScene" uid="uid://c6w7d5q1dqo1t" path="res://Scenes/ProtonField.tscn" id="4_wowpa"]
 [ext_resource type="PackedScene" uid="uid://b5yqjgm1q1w8t" path="res://Scenes/ElectronField.tscn" id="5_i6g32"]
 
@@ -143,6 +143,108 @@ text = "Restart"
 [node name="MainMenuButton" type="Button" parent="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow" unique_id=1729583553]
 custom_minimum_size = Vector2(140, 44)
 layout_mode = 2
+text = "Main Menu"
+
+[node name="VictoryOverlay" type="ColorRect" parent="UI" unique_id=101614608]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0.08, 0.12, 0.05, 0.85)
+
+[node name="VictoryPanel" type="Panel" parent="UI/VictoryOverlay" unique_id=1695915014]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -220.0
+offset_right = 420.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VictoryContent" type="VBoxContainer" parent="UI/VictoryOverlay/VictoryPanel" unique_id=497896487]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -380.0
+offset_top = -190.0
+offset_right = 380.0
+offset_bottom = 190.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="VictoryTitle" type="Label" parent="UI/VictoryOverlay/VictoryPanel/VictoryContent" unique_id=931150872]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.4, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(0.15, 0.4, 0.1, 1)
+theme_override_constants/shadow_offset_x = 3
+theme_override_constants/shadow_offset_y = 3
+theme_override_constants/outline_size = 8
+theme_override_fonts/font = ExtResource("2_i6g32")
+theme_override_font_sizes/font_size = 68
+text = "VICTORY!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CongratsMessage" type="Label" parent="UI/VictoryOverlay/VictoryPanel/VictoryContent" unique_id=931150873]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 1, 0.9, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.6)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_1l0tm")
+theme_override_font_sizes/font_size = 26
+text = "Congratulations!
+
+You successfully navigated the radioactive decay chain
+from Uranium-238 all the way to stable Lead-206!"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="ScoreDisplay" type="Label" parent="UI/VictoryOverlay/VictoryPanel/VictoryContent" unique_id=931150874]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_fonts/font = ExtResource("2_i6g32")
+theme_override_font_sizes/font_size = 42
+text = "Final Score: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VictoryButtonRow" type="HBoxContainer" parent="UI/VictoryOverlay/VictoryPanel/VictoryContent" unique_id=270385893]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="VictoryRestartButton" type="Button" parent="UI/VictoryOverlay/VictoryPanel/VictoryContent/VictoryButtonRow" unique_id=1226774071]
+custom_minimum_size = Vector2(180, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 1, 0.95, 1)
+theme_override_font_sizes/font_size = 22
+text = "Play Again"
+
+[node name="VictoryMainMenuButton" type="Button" parent="UI/VictoryOverlay/VictoryPanel/VictoryContent/VictoryButtonRow" unique_id=1729583554]
+custom_minimum_size = Vector2(180, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 1, 0.95, 1)
+theme_override_font_sizes/font_size = 22
 text = "Main Menu"
 
 [node name="GoalArea" type="Node2D" parent="." unique_id=820211187]

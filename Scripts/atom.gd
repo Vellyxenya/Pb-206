@@ -3,6 +3,7 @@ extends RigidBody2D
 const NucleusScene = preload("res://Scenes/nucleus.tscn")
 
 signal phase_timer_finished
+signal cheat_decay_triggered
 
 @export var isotope_key: String = "U-238"
 @export var acceleration_force: float = 5400.0
@@ -53,6 +54,13 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_T:
 		phase_time_left = max(0.0, phase_time_left - 10.0)
 		print("DEBUG: Timer reduced by 10s. Remaining: ", snapped(phase_time_left, 0.1), "s")
+	
+	# DEBUG: Press 'D' to instantly decay to next stage (testing purposes)
+	if event is InputEventKey and event.pressed and event.keycode == KEY_D:
+		phase_time_left = 0.0
+		phase_active = false
+		cheat_decay_triggered.emit()
+		print("DEBUG: Instant decay triggered!")
 
 func teleport_towards(world_target: Vector2, distance: float) -> void:
 	var to_target = world_target - global_position

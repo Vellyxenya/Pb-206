@@ -70,6 +70,11 @@ func setup_references(p_player: Node2D, p_camera: Camera2D, p_hazards_root: Node
 
 func spawn_initial_entities() -> void:
 	"""Spawn initial set of entities at game start"""
+	# Don't spawn hazards if we've reached stable Pb-206
+	if _is_stable_isotope():
+		print("Stable isotope reached - not spawning hazards")
+		return
+	
 	randomize_goal_position()
 	_spawn_neutron_fields(neutron_field_target_density)
 	_spawn_force_fields(force_field_target_density)
@@ -86,6 +91,10 @@ func clear_all_entities() -> void:
 func _check_and_spawn_entities() -> void:
 	"""Check entity counts and spawn more if below target density"""
 	if player == null:
+		return
+	
+	# Don't spawn if we've reached stable Pb-206
+	if _is_stable_isotope():
 		return
 	
 	var player_pos = player.global_position
@@ -120,6 +129,17 @@ func _despawn_distant_entities() -> void:
 	_despawn_distant(force_fields, player_pos, despawn_radius)
 	_despawn_distant(collectibles, player_pos, despawn_radius)
 	_despawn_distant(neutrinos, player_pos, despawn_radius)
+
+func _is_stable_isotope() -> bool:
+	"""Check if current isotope is stable (Pb-206)"""
+	if player == null or not "isotope_key" in player:
+		return false
+	
+	var isotope_data = IsotopeData.get_isotope(player.isotope_key)
+	if isotope_data.is_empty():
+		return false
+	
+	return isotope_data.get("decay_type") == "stable"
 
 func _count_nearby(entities: Array, center: Vector2, radius: float) -> int:
 	"""Count how many entities are within radius of center"""

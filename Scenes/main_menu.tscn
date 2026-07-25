@@ -38,7 +38,7 @@ alignment = 1
 [node name="Title" type="Label" parent="Center/VBox" unique_id=375065300]
 layout_mode = 2
 theme_override_font_sizes/font_size = 72
-text = "PB-206"
+text = "Pb-206"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Center/VBox" unique_id=857131821]
@@ -80,7 +80,6 @@ theme_override_font_sizes/font_size = 16
 text = "M5/M6 debug: T = -10s timer, Y = teleport 100 units toward cursor"
 horizontal_alignment = 1
 
-[node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=153562327]
 stream = ExtResource("3_music")
 autoplay = true
-

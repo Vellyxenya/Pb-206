@@ -30,6 +30,10 @@ var phase_audio_player: AudioStreamPlayer
 @onready var game_over_title: Label = $UI/GameOverOverlay/GameOverPanel/GameOverContent/GameOverTitle
 @onready var restart_button: Button = $UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow/RestartButton
 @onready var main_menu_button: Button = $UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow/MainMenuButton
+@onready var victory_overlay: ColorRect = $UI/VictoryOverlay
+@onready var victory_score_display: Label = $UI/VictoryOverlay/VictoryPanel/VictoryContent/ScoreDisplay
+@onready var victory_restart_button: Button = $UI/VictoryOverlay/VictoryPanel/VictoryContent/VictoryButtonRow/VictoryRestartButton
+@onready var victory_main_menu_button: Button = $UI/VictoryOverlay/VictoryPanel/VictoryContent/VictoryButtonRow/VictoryMainMenuButton
 @onready var lucky_popup_label: Label = $UI/LuckyPopupLabel
 @onready var goal_area: Node2D = $GoalArea
 @onready var goal_fill: Polygon2D = $GoalArea/GoalFill
@@ -51,20 +55,27 @@ func _ready() -> void:
 	if atom != null:
 		starting_isotope_key = atom.isotope_key
 		atom.phase_timer_finished.connect(_on_atom_phase_timer_finished)
+		atom.cheat_decay_triggered.connect(_on_atom_cheat_decay)
 	if restart_button != null:
 		restart_button.pressed.connect(_on_restart_pressed)
 	if main_menu_button != null:
 		main_menu_button.pressed.connect(_on_main_menu_pressed)
+	if victory_restart_button != null:
+		victory_restart_button.pressed.connect(_on_restart_pressed)
+	if victory_main_menu_button != null:
+		victory_main_menu_button.pressed.connect(_on_main_menu_pressed)
 	if transition_flash != null:
 		transition_flash.visible = false
 	if game_over_overlay != null:
 		game_over_overlay.visible = false
+	if victory_overlay != null:
+		victory_overlay.visible = false
 	if lucky_popup_label != null:
 		lucky_popup_label.visible = false
 	Engine.time_scale = 1.0
 	
 	goal_distance_label.modulate = Color(0.0, 0.0, 0.0, 1.0)
-	
+
 	current_score = 0
 	_update_score_display()
 
@@ -127,7 +138,7 @@ func is_atom_in_finish_area() -> bool:
 	return atom.global_position.distance_to(spawn_manager.goal_position) <= goal_radius
 
 func _on_atom_phase_timer_finished() -> void:
-	if atom == null:
+	if atom == null or is_game_over:
 		return
 
 	if is_atom_in_finish_area():
@@ -135,8 +146,14 @@ func _on_atom_phase_timer_finished() -> void:
 	else:
 		start_phase_transition(false, "Timer expired outside finish area")
 
+func _on_atom_cheat_decay() -> void:
+	"""Called when debug key 'D' is pressed - always succeeds"""
+	if atom == null or is_game_over:
+		return
+	start_phase_transition(true)
+
 func start_phase_transition(success: bool, death_cause: String = "") -> void:
-	if is_transitioning:
+	if is_transitioning or is_game_over:
 		return
 	is_transitioning = true
 
@@ -188,15 +205,16 @@ func advance_to_next_phase() -> void:
 		atom.on_phase_completed()
 		var current_data = IsotopeData.get_isotope(atom.isotope_key)
 		
-		# Check if we've reached stable Pb-206 (no next isotope)
-		if not current_data.is_empty() and current_data.get("next_isotope") == null:
-			# Victory! Reached stable isotope
-			show_victory_screen()
-			return
-		
 		if not current_data.is_empty() and current_data.get("next_isotope") != null:
 			var decay_type = current_data.get("decay_type", "alpha")
 			atom.isotope_key = str(current_data.next_isotope)
+			
+			# Check if we've reached stable Pb-206 (after setting new isotope_key)
+			var next_data = IsotopeData.get_isotope(atom.isotope_key)
+			if not next_data.is_empty() and next_data.get("decay_type") == "stable":
+				# Reached stable isotope - handle victory sequence
+				handle_stable_isotope_victory()
+				return
 			
 			# Set charge based on decay type
 			# Beta decay emits an electron, leaving the atom with +1 charge
@@ -224,12 +242,49 @@ func advance_to_next_phase() -> void:
 
 func show_victory_screen() -> void:
 	is_game_over = true
-	Engine.time_scale = 0.5
-	if game_over_overlay != null:
-		game_over_overlay.visible = true
-	if game_over_title != null:
-		game_over_title.text = "VICTORY!\n\nYou reached stable Lead-206!\n\nFinal Score: " + str(current_score)
+	Engine.time_scale = 0.6
+	
+	# Stop spawning hazards
+	if spawn_manager != null:
+		spawn_manager.set_process(false)
+		spawn_manager.clear_all_entities()
+	
+	# Show victory overlay with final score
+	if victory_overlay != null:
+		victory_overlay.visible = true
+	if victory_score_display != null:
+		victory_score_display.text = "Final Score: " + str(current_score)
+	
 	print("Victory! Reached stable Pb-206 with score: ", current_score)
+
+func handle_stable_isotope_victory() -> void:
+	"""Handle transition to stable Pb-206 isotope"""
+	print("Reached stable Pb-206! Starting victory sequence...")
+	
+	# Load the stable isotope visuals but don't start timer
+	if atom != null:
+		atom.set_charge(0)  # Lead-206 is neutral
+		atom.load_isotope_data()
+		atom.reset_phase_visuals()
+		atom.phase_active = false  # Disable phase timer for stable isotope
+	
+	# Hide UI elements
+	if timer_label != null:
+		timer_label.visible = false
+	if goal_status_label != null:
+		goal_status_label.visible = false
+	if goal_arrow != null:
+		goal_arrow.visible = false
+	if goal_distance_label != null:
+		goal_distance_label.visible = false
+	
+	# Clear all hazards
+	if spawn_manager != null:
+		spawn_manager.clear_all_entities()
+	
+	# Wait 4 seconds then show victory screen
+	await get_tree().create_timer(4.0).timeout
+	show_victory_screen()
 
 func restart_current_phase() -> void:
 	is_game_over = false
@@ -237,6 +292,14 @@ func restart_current_phase() -> void:
 	Engine.time_scale = 1.0
 	if game_over_overlay != null:
 		game_over_overlay.visible = false
+	if victory_overlay != null:
+		victory_overlay.visible = false
+	
+	# Re-show UI elements
+	if timer_label != null:
+		timer_label.visible = true
+	if goal_status_label != null:
+		goal_status_label.visible = true
 
 	current_score = 0
 	_goal_bonus_accumulator = 0.0
@@ -248,6 +311,7 @@ func restart_current_phase() -> void:
 	_play_sound_for_phase(current_phase_index)
 
 	if spawn_manager != null:
+		spawn_manager.set_process(true)  # Re-enable spawning
 		spawn_manager.clear_all_entities()
 		spawn_manager.spawn_initial_entities()
 		spawn_manager.connect_photon_signals(self)
@@ -278,6 +342,8 @@ func _update_score_display() -> void:
 
 func on_player_neutrino_death() -> void:
 	"""Called when a neutrino hits the player"""
+	if is_game_over or is_transitioning:
+		return
 	print("Player hit by neutrino!")
 	if atom != null and atom.has_method("play_destroy_animation"):
 		await atom.play_destroy_animation()
@@ -285,11 +351,13 @@ func on_player_neutrino_death() -> void:
 
 func on_player_neutron_death_from_field() -> void:
 	"""Called by spawn_manager when neutron field kills player"""
+	if is_game_over or is_transitioning:
+		return
 	start_phase_transition(false, "Neutron field spike")
 
 func show_lucky_popup() -> void:
 	"""Called by spawn_manager when player survives neutron field"""
-	if atom == null or lucky_popup_label == null:
+	if atom == null or lucky_popup_label == null or is_game_over:
 		return
 	
 	var world_pos = atom.global_position + Vector2(0.0, -80.0)
