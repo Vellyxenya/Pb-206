@@ -47,6 +47,7 @@ var sfx_player: AudioStreamPlayer = null  # Sound effects player
 @onready var hazards_root: Node2D = $Hazards
 @onready var collectibles_root: Node2D = $Collectibles
 @onready var spawn_manager: Node2D = $SpawnManager
+@onready var hover_sound_stream_player: AudioStreamPlayer2D = $UI/ButtonHoverSound
 
 func _ready() -> void:
 	add_to_group("game")  # Allow hazards to find the game node
@@ -640,3 +641,19 @@ func _fade_to_music(new_stream: AudioStream) -> void:
 	music_fade_tween = create_tween()
 	music_fade_tween.tween_property(phase_audio_player, "volume_db", 0.0, 1.0)
 	await music_fade_tween.finished
+
+
+func _on_restart_button_mouse_entered() -> void:
+	hover_sound_stream_player.play()
+
+
+func _on_main_menu_button_mouse_entered() -> void:
+	hover_sound_stream_player.play()
+
+
+func _on_victory_restart_button_mouse_entered() -> void:
+	hover_sound_stream_player.play()
+
+
+func _on_victory_main_menu_button_mouse_entered() -> void:
+	hover_sound_stream_player.play()

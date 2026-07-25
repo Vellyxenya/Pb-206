@@ -5,6 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://botb65phhq87h" path="res://Assets/main_menu_background.jpeg" id="2_ce3w2"]
 [ext_resource type="AudioStream" uid="uid://wdqeh1kl1j2u" path="res://Assets/Sounds/CyberpunkMoonlightSonata.mp3" id="3_music"]
 [ext_resource type="FontFile" uid="uid://4ham724licbw" path="res://Assets/Fonts/Quantico/Quantico-Bold.ttf" id="3_n45e2"]
+[ext_resource type="AudioStream" uid="uid://b5npl4nyl3b2a" path="res://Assets/Sounds/hover-sound.mp3" id="6_opfnp"]
 
 [node name="MainMenu" type="Control" unique_id=521885236]
 layout_mode = 3
@@ -122,4 +123,13 @@ horizontal_alignment = 1
 
 [node name="MusicPlayer" type="AudioStreamPlayer" parent="." unique_id=153562327]
 stream = ExtResource("3_music")
+volume_db = -33.16
 autoplay = true
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1926114158]
+stream = ExtResource("6_opfnp")
+volume_db = 10.551
+
+[connection signal="mouse_entered" from="Center/VBox/StartButton" to="." method="_on_start_button_mouse_entered"]
+[connection signal="mouse_entered" from="Center/VBox/CreditsButton" to="." method="_on_credits_button_mouse_entered"]
+[connection signal="mouse_entered" from="Center/VBox/QuitButton" to="." method="_on_quit_button_mouse_entered"]

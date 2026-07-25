@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://1n227odevv75" path="res://Scripts/game.gd" id="2_gamescript"]
 [ext_resource type="FontFile" uid="uid://4ham724licbw" path="res://Assets/Fonts/Quantico/Quantico-Bold.ttf" id="2_i6g32"]
 [ext_resource type="Script" uid="uid://bbw1t7mpty6we" path="res://Scripts/world_background.gd" id="3_backgroundscript"]
+[ext_resource type="AudioStream" uid="uid://b5npl4nyl3b2a" path="res://Assets/Sounds/hover-sound.mp3" id="4_h4fw4"]
 [ext_resource type="PackedScene" path="res://Scenes/SpawnManager.tscn" id="4_spawn"]
 [ext_resource type="PackedScene" uid="uid://c6w7d5q1dqo1t" path="res://Scenes/ProtonField.tscn" id="4_wowpa"]
 [ext_resource type="PackedScene" uid="uid://b5yqjgm1q1w8t" path="res://Scenes/ElectronField.tscn" id="5_i6g32"]
@@ -138,11 +139,13 @@ alignment = 1
 [node name="RestartButton" type="Button" parent="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow" unique_id=1226774070]
 custom_minimum_size = Vector2(140, 44)
 layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
 text = "Restart"
 
 [node name="MainMenuButton" type="Button" parent="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow" unique_id=1729583553]
 custom_minimum_size = Vector2(140, 44)
 layout_mode = 2
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
 text = "Main Menu"
 
 [node name="VictoryOverlay" type="ColorRect" parent="UI" unique_id=101614608]
@@ -237,6 +240,7 @@ alignment = 1
 custom_minimum_size = Vector2(180, 52)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 1, 0.95, 1)
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
 theme_override_font_sizes/font_size = 22
 text = "Play Again"
 
@@ -244,8 +248,13 @@ text = "Play Again"
 custom_minimum_size = Vector2(180, 52)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.95, 1, 0.95, 1)
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
 theme_override_font_sizes/font_size = 22
 text = "Main Menu"
+
+[node name="ButtonHoverSound" type="AudioStreamPlayer2D" parent="UI" unique_id=1011061721]
+stream = ExtResource("4_h4fw4")
+volume_db = 10.3
 
 [node name="GoalArea" type="Node2D" parent="." unique_id=820211187]
 position = Vector2(720, 200)
@@ -278,3 +287,8 @@ position = Vector2(316, 728)
 
 [node name="ElectronField" parent="." unique_id=584002437 instance=ExtResource("5_i6g32")]
 position = Vector2(429, -208)
+
+[connection signal="mouse_entered" from="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow/RestartButton" to="." method="_on_restart_button_mouse_entered"]
+[connection signal="mouse_entered" from="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow/MainMenuButton" to="." method="_on_main_menu_button_mouse_entered"]
+[connection signal="mouse_entered" from="UI/VictoryOverlay/VictoryPanel/VictoryContent/VictoryButtonRow/VictoryRestartButton" to="." method="_on_victory_restart_button_mouse_entered"]
+[connection signal="mouse_entered" from="UI/VictoryOverlay/VictoryPanel/VictoryContent/VictoryButtonRow/VictoryMainMenuButton" to="." method="_on_victory_main_menu_button_mouse_entered"]
