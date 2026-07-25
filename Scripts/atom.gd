@@ -10,7 +10,6 @@ signal cheat_decay_triggered
 @export var movement_damping: float = 1.1
 @export var mouse_deadzone: float = 20.0
 @export var collider_padding: float = -18.0
-@export var electron_base_radius: float = 50.0
 @export var electron_shell_spacing: float = 28.0
 @export var electron_orbit_speed: float = 1.2
 
@@ -280,7 +279,7 @@ func spawn_electrons(electron_count: int) -> void:
 	var shell_index = 0
 	
 	# Base radius is collision radius + 20
-	var base_orbit_radius = collision_radius + 20.0
+	var base_orbit_radius = collision_radius + 40.0
 	
 	while electrons_remaining > 0 and shell_index < shell_capacities.size():
 		var electrons_in_shell = min(electrons_remaining, shell_capacities[shell_index])

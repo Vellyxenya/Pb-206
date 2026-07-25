@@ -19,7 +19,9 @@ var lucky_popup_tween: Tween
 var phase_sounds: Array[AudioStream] = []
 var phase_audio_player: AudioStreamPlayer
 var victory_music: AudioStream = null
+var game_over_sound: AudioStream = null
 var music_fade_tween: Tween = null  # Tween for music fade transitions
+var sfx_player: AudioStreamPlayer = null  # Sound effects player
 
 @onready var atom: RigidBody2D = $Player/Atom
 @onready var camera: Camera2D = $Player/Atom/Camera2D
@@ -331,6 +333,16 @@ func restart_current_phase() -> void:
 func enter_game_over_state(death_cause: String = "Timer expired outside finish area") -> void:
 	is_game_over = true
 	Engine.time_scale = game_over_time_scale
+	
+	# Fade out level music
+	if phase_audio_player != null and phase_audio_player.playing:
+		_fade_out_music()
+	
+	# Play game over sound effect
+	if sfx_player != null and game_over_sound != null:
+		sfx_player.stream = game_over_sound
+		sfx_player.play()
+	
 	if game_over_overlay != null:
 		game_over_overlay.visible = true
 	if game_over_title != null:
@@ -488,6 +500,13 @@ func _setup_phase_audio() -> void:
 	phase_audio_player.bus = "Master"
 	phase_audio_player.autoplay = false
 	add_child(phase_audio_player)
+	
+	# Create sound effects player
+	sfx_player = AudioStreamPlayer.new()
+	sfx_player.name = "SFXPlayer"
+	sfx_player.bus = "Master"
+	sfx_player.autoplay = false
+	add_child(sfx_player)
 
 	phase_sounds = _load_phase_sounds()
 	
@@ -495,6 +514,11 @@ func _setup_phase_audio() -> void:
 	victory_music = load("res://Assets/Sounds/BlackTrendMusic - Sport Victory Energetic Rock.mp3") as AudioStream
 	if victory_music == null:
 		push_warning("Victory music not found!")
+	
+	# Load game over sound
+	game_over_sound = load("res://Assets/Sounds/gameover.wav") as AudioStream
+	if game_over_sound == null:
+		push_warning("Game over sound not found!")
 
 func _load_phase_sounds() -> Array[AudioStream]:
 	var sounds: Array[AudioStream] = []
