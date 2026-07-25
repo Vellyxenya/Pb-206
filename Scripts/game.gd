@@ -672,7 +672,7 @@ func _update_goal_status(in_finish_area: bool) -> void:
 	if goal_status_label == null:
 		return
 
-	goal_status_label.text = "Finish Area: IN" if in_finish_area else "Finish Area: OUT.\nHurry to the area before the timer runs out!"
+	goal_status_label.text = "Finish Area: IN" if in_finish_area else "Finish Area: OUT. Hurry to the area before the timer runs out!"
 	goal_status_label.modulate = Color(0.18, 0.62, 0.22) if in_finish_area else Color(0.82, 0.2, 0.2)
 
 func _update_goal_guidance(in_finish_area: bool) -> void:

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://c6bhfpia8tmhf" path="res://Scripts/main_menu.gd" id="1_mainmenu"]
 [ext_resource type="FontFile" uid="uid://cfw0w3v8xsull" path="res://Assets/Fonts/Quantico/Quantico-Regular.ttf" id="2_48xlc"]
+[ext_resource type="AudioStream" uid="uid://wdqeh1kl1j2u" path="res://Assets/Sounds/CyberpunkMoonlightSonata.mp3" id="3_music"]
 
 [node name="MainMenu" type="Control" unique_id=521885236]
 layout_mode = 3
@@ -78,3 +79,8 @@ theme_override_colors/font_color = Color(0.78, 0.84, 0.9, 1)
 theme_override_font_sizes/font_size = 16
 text = "M5/M6 debug: T = -10s timer, Y = teleport 100 units toward cursor"
 horizontal_alignment = 1
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_music")
+autoplay = true
+

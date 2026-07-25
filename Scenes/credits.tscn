@@ -81,7 +81,8 @@ layout_mode = 2
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_xelri")
 theme_override_font_sizes/font_size = 20
-text = "Music: weloveindies.com/en/welcome/jammers
+text = "Menu Music: opengameart.org/content/cyberpunk-moonlight-sonata
+Level Music: weloveindies.com/en/welcome/jammers
 Font: fonts.google.com/specimen/Quantico"
 horizontal_alignment = 1
 
