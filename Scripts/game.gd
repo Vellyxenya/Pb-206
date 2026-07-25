@@ -18,6 +18,7 @@ var _goal_bonus_accumulator: float = 0.0
 var lucky_popup_tween: Tween
 var phase_sounds: Array[AudioStream] = []
 var phase_audio_player: AudioStreamPlayer
+var victory_music: AudioStream = null
 
 @onready var atom: RigidBody2D = $Player/Atom
 @onready var camera: Camera2D = $Player/Atom/Camera2D
@@ -261,6 +262,14 @@ func handle_stable_isotope_victory() -> void:
 	"""Handle transition to stable Pb-206 isotope"""
 	print("Reached stable Pb-206! Starting victory sequence...")
 	
+	# Play victory music
+	if phase_audio_player != null and victory_music != null:
+		phase_audio_player.stop()
+		phase_audio_player.stream = victory_music
+		phase_audio_player.play()
+	else:
+		print("Warning: Victory music not available")
+	
 	# Load the stable isotope visuals but don't start timer
 	if atom != null:
 		atom.set_charge(0)  # Lead-206 is neutral
@@ -466,6 +475,11 @@ func _setup_phase_audio() -> void:
 	add_child(phase_audio_player)
 
 	phase_sounds = _load_phase_sounds()
+	
+	# Load victory music
+	victory_music = load("res://Assets/Sounds/BlackTrendMusic - Sport Victory Energetic Rock.mp3") as AudioStream
+	if victory_music == null:
+		push_warning("Victory music not found!")
 
 func _load_phase_sounds() -> Array[AudioStream]:
 	var sounds: Array[AudioStream] = []
@@ -519,10 +533,17 @@ func _play_sound_for_phase(phase_index: int) -> void:
 		return
 	if phase_index <= 0:
 		return
+	
+	# Loop music after phase 10: phase 11 uses kf01, phase 12 uses kf02, etc.
+	var music_index = phase_index
 	if phase_index > phase_sounds.size():
+		music_index = ((phase_index - 1) % phase_sounds.size()) + 1
+		print("Phase ", phase_index, " using music from phase ", music_index)
+	
+	if music_index > phase_sounds.size():
 		push_warning("No phase sound found for phase " + str(phase_index))
 		return
 
 	phase_audio_player.stop()
-	phase_audio_player.stream = phase_sounds[phase_index - 1]
+	phase_audio_player.stream = phase_sounds[music_index - 1]
 	phase_audio_player.play()

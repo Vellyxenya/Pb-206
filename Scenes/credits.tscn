@@ -42,7 +42,6 @@ text = "CREDITS"
 horizontal_alignment = 1
 
 [node name="Spacer1" type="Control" parent="CenterContainer/VBoxContainer" unique_id=2107514357]
-custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 
 [node name="Logo" type="TextureRect" parent="CenterContainer/VBoxContainer" unique_id=683159710]
@@ -74,16 +73,22 @@ text = "Developed By: Noureddine Gueddach"
 horizontal_alignment = 1
 
 [node name="Spacer4" type="Control" parent="CenterContainer/VBoxContainer" unique_id=1722169242]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 25)
 layout_mode = 2
 
 [node name="MusicLabel" type="Label" parent="CenterContainer/VBoxContainer" unique_id=1081909272]
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_xelri")
 theme_override_font_sizes/font_size = 20
-text = "Menu Music: opengameart.org/content/cyberpunk-moonlight-sonata
-Level Music: weloveindies.com/en/welcome/jammers
-Font: fonts.google.com/specimen/Quantico"
+text = "Menu Music
+opengameart.org/content/cyberpunk-moonlight-sonata
+
+Level Music
+weloveindies.com/en/music-for-games
+freemusicarchive.org
+
+Font
+fonts.google.com/specimen/Quantico"
 horizontal_alignment = 1
 
 [node name="BackButton" type="Button" parent="." unique_id=1518306662]

@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://tk48v3oxitf8"
+path="res://.godot/imported/BlackTrendMusic - Sport Victory Energetic Rock.mp3-15dd54b02d5e73dd81e6cd4b2876a5aa.mp3str"
+
+[deps]
+
+source_file="res://Assets/Sounds/BlackTrendMusic - Sport Victory Energetic Rock.mp3"
+dest_files=["res://.godot/imported/BlackTrendMusic - Sport Victory Energetic Rock.mp3-15dd54b02d5e73dd81e6cd4b2876a5aa.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
