@@ -20,6 +20,7 @@ linear_accel_max = -50.0
 scale_max = 2.5
 
 [node name="Player" type="Node2D" unique_id=518713802]
+process_mode = 1
 script = ExtResource("1_0q8th")
 
 [node name="Atom" parent="." unique_id=1907918391 instance=ExtResource("2_ehw5f")]

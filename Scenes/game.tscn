@@ -15,6 +15,7 @@
 [ext_resource type="AudioStream" uid="uid://dnvk1d2k4n3dh" path="res://Assets/Sounds/beep.wav" id="13_rfjv2"]
 
 [node name="Game" type="Node2D" unique_id=1236288522]
+process_mode = 3
 script = ExtResource("2_gamescript")
 
 [node name="UI" type="CanvasLayer" parent="." unique_id=598616309]
@@ -277,6 +278,86 @@ text = "10"
 horizontal_alignment = 1
 vertical_alignment = 1
 
+[node name="PauseMenuOverlay" type="ColorRect" parent="UI" unique_id=101614609]
+process_mode = 3
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0.05, 0.05, 0.08, 0.85)
+
+[node name="PauseMenuPanel" type="Panel" parent="UI/PauseMenuOverlay" unique_id=1695915015]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -160.0
+offset_right = 200.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PauseMenuContent" type="VBoxContainer" parent="UI/PauseMenuOverlay/PauseMenuPanel" unique_id=497896488]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -130.0
+offset_right = 150.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="PauseTitle" type="Label" parent="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent" unique_id=931150875]
+custom_minimum_size = Vector2(280, 60)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 1, 1)
+theme_override_fonts/font = ExtResource("2_i6g32")
+theme_override_font_sizes/font_size = 42
+text = "PAUSED"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PauseButtonContainer" type="VBoxContainer" parent="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent" unique_id=270385894]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="ResumeButton" type="Button" parent="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent/PauseButtonContainer" unique_id=1226774072]
+custom_minimum_size = Vector2(220, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 1, 0.95, 1)
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
+theme_override_font_sizes/font_size = 24
+text = "Resume"
+
+[node name="MainMenuButton" type="Button" parent="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent/PauseButtonContainer" unique_id=1729583555]
+custom_minimum_size = Vector2(220, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 1, 0.95, 1)
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
+theme_override_font_sizes/font_size = 24
+text = "Exit to Main Menu"
+
+[node name="QuitButton" type="Button" parent="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent/PauseButtonContainer" unique_id=1729583556]
+custom_minimum_size = Vector2(220, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 1, 0.95, 1)
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
+theme_override_font_sizes/font_size = 24
+text = "Exit to Desktop"
+
 [node name="ButtonHoverSound" type="AudioStreamPlayer2D" parent="UI" unique_id=1011061721]
 stream = ExtResource("4_h4fw4")
 volume_db = 10.3
@@ -295,12 +376,15 @@ default_color = Color(0.22, 0.6, 0.22, 0.95)
 antialiased = true
 
 [node name="Hazards" type="Node2D" parent="." unique_id=2085012273]
+process_mode = 1
 
 [node name="Collectibles" type="Node2D" parent="." unique_id=281913840]
+process_mode = 1
 
 [node name="SpawnManager" parent="." unique_id=1085012274 instance=ExtResource("4_spawn")]
 
 [node name="Background" type="Node2D" parent="." unique_id=1970185643]
+process_mode = 1
 z_index = -10
 script = ExtResource("3_backgroundscript")
 
@@ -322,9 +406,15 @@ stream = ExtResource("11_rku1e")
 [node name="NeutrinoCollisionPlayer" type="AudioStreamPlayer" parent="." unique_id=1649294560]
 stream = ExtResource("12_rku1e")
 
-[node name="BeepSoundPlayer" type="AudioStreamPlayer" parent="." unique_id=1022948607]
+[node name="CountdownBeepPlayer" type="AudioStreamPlayer" parent="." unique_id=1022948607]
 stream = ExtResource("13_rfjv2")
 
+[connection signal="pressed" from="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent/PauseButtonContainer/ResumeButton" to="." method="_on_pause_resume_button_pressed"]
+[connection signal="mouse_entered" from="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent/PauseButtonContainer/ResumeButton" to="." method="_on_pause_button_mouse_entered"]
+[connection signal="pressed" from="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent/PauseButtonContainer/MainMenuButton" to="." method="_on_pause_main_menu_button_pressed"]
+[connection signal="mouse_entered" from="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent/PauseButtonContainer/MainMenuButton" to="." method="_on_pause_button_mouse_entered"]
+[connection signal="pressed" from="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent/PauseButtonContainer/QuitButton" to="." method="_on_pause_quit_button_pressed"]
+[connection signal="mouse_entered" from="UI/PauseMenuOverlay/PauseMenuPanel/PauseMenuContent/PauseButtonContainer/QuitButton" to="." method="_on_pause_button_mouse_entered"]
 [connection signal="mouse_entered" from="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow/RestartButton" to="." method="_on_restart_button_mouse_entered"]
 [connection signal="mouse_entered" from="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow/MainMenuButton" to="." method="_on_main_menu_button_mouse_entered"]
 [connection signal="mouse_entered" from="UI/VictoryOverlay/VictoryPanel/VictoryContent/VictoryButtonRow/VictoryRestartButton" to="." method="_on_victory_restart_button_mouse_entered"]

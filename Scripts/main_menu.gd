@@ -32,10 +32,7 @@ func _on_start_pressed() -> void:
 	# Fade out menu music before transitioning
 	if music_player != null and music_player.playing:
 		await _fade_out_music()
-	if LeaderboardManager.player_username.strip_edges().is_empty():
-		get_tree().change_scene_to_file("res://Scenes/username_prompt.tscn")
-	else:
-		get_tree().change_scene_to_file("res://Scenes/game.tscn")
+	get_tree().change_scene_to_file("res://Scenes/game.tscn")
 
 func _on_credits_pressed() -> void:
 	get_tree().change_scene_to_file("res://Scenes/credits.tscn")

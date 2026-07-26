@@ -5,5 +5,6 @@
 [ext_resource type="PackedScene" uid="uid://b5yqjgm1q1w8t" path="res://Scenes/ElectronField.tscn" id="3_electron"]
 
 [node name="SpawnManager" type="Node2D"]
+process_mode = 1
 script = ExtResource("1_spawn")
 hazard_scenes = Array[PackedScene]([ExtResource("2_proton"), ExtResource("3_electron")])

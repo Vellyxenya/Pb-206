@@ -12,6 +12,7 @@ const GOAL_VISUAL_SEGMENTS: int = 64
 
 var is_transitioning: bool = false
 var is_game_over: bool = false
+var is_paused: bool = false
 var starting_isotope_key: String = ""
 var current_phase_index: int = 1
 var current_score: int = 0
@@ -59,10 +60,13 @@ var _countdown_tween: Tween = null  # Tween for countdown animation
 @onready var beta_decay_sound_player: AudioStreamPlayer = $BetaDecaySound
 @onready var neutrino_collision_player: AudioStreamPlayer = $NeutrinoCollisionPlayer
 @onready var countdown_timer_label: Label = $UI/CountdownTimerLabel
-@onready var beep_sound_player: AudioStreamPlayer = $BeepSoundPlayer
+@onready var beep_sound_player: AudioStreamPlayer = $CountdownBeepPlayer
+@onready var pause_menu_overlay: ColorRect = $UI/PauseMenuOverlay
 
 func _ready() -> void:
 	add_to_group("game")  # Allow hazards to find the game node
+	
+	Input.mouse_mode = Input.MOUSE_MODE_CONFINED
 	
 	# Setup spawn manager
 	if spawn_manager != null:
@@ -87,6 +91,8 @@ func _ready() -> void:
 		game_over_overlay.visible = false
 	if victory_overlay != null:
 		victory_overlay.visible = false
+	if pause_menu_overlay != null:
+		pause_menu_overlay.visible = false
 	if lucky_popup_label != null:
 		lucky_popup_label.visible = false
 	Engine.time_scale = 1.0
@@ -95,7 +101,7 @@ func _ready() -> void:
 
 	current_score = 0
 	_update_score_display()
-
+	
 	_setup_phase_audio()
 	_play_sound_for_phase(current_phase_index)
 
@@ -108,6 +114,14 @@ func _ready() -> void:
 	_update_goal_area_visual()
 	_update_goal_status(false)
 	_update_goal_guidance(false)
+
+func _unhandled_input(event: InputEvent) -> void:
+	# Toggle pause with P or Esc keys
+	if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and event.keycode == KEY_P):
+		# Don't allow pausing during game over or victory screens
+		if not is_game_over and victory_overlay != null and not victory_overlay.visible:
+			toggle_pause()
+			get_viewport().set_input_as_handled()
 
 func _process(_delta):
 	if background != null:
@@ -962,4 +976,65 @@ func _on_victory_restart_button_mouse_entered() -> void:
 
 
 func _on_victory_main_menu_button_mouse_entered() -> void:
+	hover_sound_stream_player.play()
+
+func toggle_pause() -> void:
+	"""Toggle pause state"""
+	if is_paused:
+		unpause_game()
+	else:
+		pause_game()
+
+func pause_game() -> void:
+	"""Pause the game"""
+	if is_paused:
+		return
+	
+	is_paused = true
+	get_tree().paused = true
+	
+	if pause_menu_overlay != null:
+		pause_menu_overlay.visible = true
+	
+	# Show mouse cursor
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+
+func unpause_game() -> void:
+	"""Unpause the game"""
+	if not is_paused:
+		return
+	
+	is_paused = false
+	get_tree().paused = false
+	
+	if pause_menu_overlay != null:
+		pause_menu_overlay.visible = false
+	
+	# Confine mouse cursor again
+	Input.mouse_mode = Input.MOUSE_MODE_CONFINED
+
+func _on_pause_resume_button_pressed() -> void:
+	unpause_game()
+
+func _on_pause_main_menu_button_pressed() -> void:
+	# Unpause first
+	get_tree().paused = false
+	is_paused = false
+	Engine.time_scale = 1.0
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	
+	# Fade out music
+	if phase_audio_player != null and phase_audio_player.playing:
+		await _fade_out_music()
+	
+	if ResourceLoader.exists("res://Scenes/main_menu.tscn"):
+		get_tree().change_scene_to_file("res://Scenes/main_menu.tscn")
+	else:
+		print("Main menu scene missing; closing game.")
+		get_tree().quit()
+
+func _on_pause_quit_button_pressed() -> void:
+	get_tree().quit()
+
+func _on_pause_button_mouse_entered() -> void:
 	hover_sound_stream_player.play()

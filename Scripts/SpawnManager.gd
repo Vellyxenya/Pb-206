@@ -58,7 +58,7 @@ func _process(delta: float) -> void:
 	_spawn_check_timer -= delta
 	
 	if _spawn_check_timer <= 0.0:
-		_spawn_check_timer = spawn_check_interval
+		_spawn_check_timer = spawn_check_interval  # Reset to interval, not accumulate negative time
 		_check_and_spawn_entities()
 		_despawn_distant_entities()
 
