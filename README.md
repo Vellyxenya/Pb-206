@@ -45,8 +45,6 @@ This project uses a **milestone-based approach** with clear verification at each
    - There should be more types of hazards
    - Improve visual of Hazards
 
-   - Sometimes photons are not captured
-   - VFX while boosting
    - Work on leaderboard
  
    - Add explanation about boosting and movement control. Tutorial?

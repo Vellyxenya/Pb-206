@@ -102,6 +102,17 @@ theme_override_fonts/font = ExtResource("2_48xlc")
 theme_override_font_sizes/font_size = 24
 text = "Credits"
 
+[node name="LeaderboardButton" type="Button" parent="Center/VBox" unique_id=123654789]
+custom_minimum_size = Vector2(280, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_focus_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
+theme_override_colors/font_pressed_color = Color(0.38431373, 0.94509804, 0.23529412, 1)
+theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
+theme_override_fonts/font = ExtResource("2_48xlc")
+theme_override_font_sizes/font_size = 24
+text = "Leaderboard"
+
 [node name="QuitButton" type="Button" parent="Center/VBox" unique_id=25659451]
 custom_minimum_size = Vector2(280, 56)
 layout_mode = 2
@@ -132,4 +143,5 @@ volume_db = 10.551
 
 [connection signal="mouse_entered" from="Center/VBox/StartButton" to="." method="_on_start_button_mouse_entered"]
 [connection signal="mouse_entered" from="Center/VBox/CreditsButton" to="." method="_on_credits_button_mouse_entered"]
+[connection signal="mouse_entered" from="Center/VBox/LeaderboardButton" to="." method="_on_leaderboard_button_mouse_entered"]
 [connection signal="mouse_entered" from="Center/VBox/QuitButton" to="." method="_on_quit_button_mouse_entered"]

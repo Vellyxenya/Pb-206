@@ -1,0 +1,128 @@
+[gd_scene format=3 uid="uid://cs8ojf05rt7nu"]
+
+[ext_resource type="Script" uid="uid://ry1xg7ptqsl" path="res://Scripts/leaderboard.gd" id="1_leaderboard"]
+[ext_resource type="FontFile" uid="uid://4ham724licbw" path="res://Assets/Fonts/Quantico/Quantico-Bold.ttf" id="2_bold"]
+[ext_resource type="FontFile" uid="uid://cfw0w3v8xsull" path="res://Assets/Fonts/Quantico/Quantico-Regular.ttf" id="3_regular"]
+
+[node name="Leaderboard" type="Control" unique_id=1317266272]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_leaderboard")
+
+[node name="Background" type="ColorRect" parent="." unique_id=952059545]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.08, 0.12, 1)
+
+[node name="Center" type="CenterContainer" parent="." unique_id=1671939910]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center" unique_id=574892388]
+custom_minimum_size = Vector2(900, 700)
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="Title" type="Label" parent="Center/VBox" unique_id=534220356]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_bold")
+theme_override_font_sizes/font_size = 46
+text = "DECAY DEBRIS RECORDS"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/VBox" unique_id=343118285]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_fonts/font = ExtResource("3_regular")
+theme_override_font_sizes/font_size = 16
+text = "Central Core Registry - Top 100 Stable Lead transitions"
+horizontal_alignment = 1
+
+[node name="HeaderPanel" type="Panel" parent="Center/VBox" unique_id=471359655]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+
+[node name="Headers" type="HBoxContainer" parent="Center/VBox/HeaderPanel" unique_id=1448629340]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_right = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Rank" type="Label" parent="Center/VBox/HeaderPanel/Headers" unique_id=1206699099]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_bold")
+theme_override_font_sizes/font_size = 18
+text = "Rank"
+
+[node name="Username" type="Label" parent="Center/VBox/HeaderPanel/Headers" unique_id=532214061]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_fonts/font = ExtResource("2_bold")
+theme_override_font_sizes/font_size = 18
+text = "Isotope Signifier"
+
+[node name="Score" type="Label" parent="Center/VBox/HeaderPanel/Headers" unique_id=1236456299]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_bold")
+theme_override_font_sizes/font_size = 18
+text = "Energy Score"
+horizontal_alignment = 2
+
+[node name="Timestamp" type="Label" parent="Center/VBox/HeaderPanel/Headers" unique_id=1686091228]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_bold")
+theme_override_font_sizes/font_size = 18
+text = "Transition Time"
+horizontal_alignment = 2
+
+[node name="Scroll" type="ScrollContainer" parent="Center/VBox" unique_id=396600158]
+custom_minimum_size = Vector2(0, 400)
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="ListContainer" type="VBoxContainer" parent="Center/VBox/Scroll" unique_id=793063989]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="Status" type="Label" parent="Center/VBox" unique_id=2000295156]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 1, 1)
+theme_override_fonts/font = ExtResource("3_regular")
+theme_override_font_sizes/font_size = 18
+text = "Connecting to registry core..."
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Center/VBox" unique_id=461199253]
+layout_mode = 2
+alignment = 1
+
+[node name="BackButton" type="Button" parent="Center/VBox/Buttons" unique_id=1110717056]
+custom_minimum_size = Vector2(240, 50)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_regular")
+theme_override_font_sizes/font_size = 20
+text = "Back to Main Menu"

@@ -460,6 +460,9 @@ func show_victory_screen() -> void:
 		victory_score_display.text = "Final Score: " + str(current_score)
 	
 	print("Victory! Reached stable Pb-206 with score: ", current_score)
+	
+	# Upload score to server
+	LeaderboardManager.upload_score(current_score)
 
 func handle_stable_isotope_victory() -> void:
 	"""Handle transition to stable Pb-206 isotope"""
@@ -562,6 +565,9 @@ func enter_game_over_state(death_cause: String = "Timer expired outside finish a
 		game_over_overlay.visible = true
 	if game_over_title != null:
 		game_over_title.text = "GAME OVER\n" + death_cause
+	
+	# Upload score to server
+	LeaderboardManager.upload_score(current_score)
 
 func _on_collectible_collected(_collector: Node2D, points: int) -> void:
 	add_score(points)
