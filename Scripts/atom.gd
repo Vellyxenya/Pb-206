@@ -12,10 +12,10 @@ signal cheat_decay_triggered
 @export var collider_padding: float = -18.0
 @export var electron_shell_spacing: float = 28.0
 @export var electron_orbit_speed: float = 1.2
-@export var max_energy: float = 100.0
-@export var boost_speed_multiplier: float = 3.0
-@export var energy_drain_rate: float = 20.0  # Energy drained per second while boosting
-@export var energy_regen_rate: float = 2.0  # Energy regenerated per second when not boosting
+@export var max_energy: float = 180.0
+@export var boost_speed_multiplier: float = 2.5
+@export var energy_drain_rate: float = 40.0  # Energy drained per second while boosting
+@export var energy_regen_rate: float = 1.0  # Energy regenerated per second when not boosting
 @export var min_energy_to_boost: float = 5.0  # Minimum energy required to start boosting
 @export var boost_transition_speed: float = 7.0  # Speed of boost lerp transition
 

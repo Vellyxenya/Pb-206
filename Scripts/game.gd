@@ -2,11 +2,11 @@ extends Node2D
 
 @export var goal_radius: float = 1200.0
 @export var goal_arrow_padding: float = 142.0
-@export var transition_duration: float = 0.8
+@export var transition_duration: float = 0.9
 @export var goal_margin: float = 220.0
 @export var game_over_time_scale: float = 0.22
-@export var points_per_second_in_goal: float = 2.0
-@export var energy_per_photon: float = 15.0
+@export var points_per_second_in_goal: float = 1.0
+@export var energy_per_photon: float = 6.0
 
 const GOAL_VISUAL_SEGMENTS: int = 64
 

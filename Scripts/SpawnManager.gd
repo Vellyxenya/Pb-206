@@ -11,9 +11,9 @@ extends Node2D
 
 @export_group("Spawn Area")
 @export var spawn_check_interval: float = 1.0  # How often to check spawn needs
-@export var spawn_radius: float = 2000.0  # Spawn items within this radius of player
-@export var despawn_radius: float = 3000.0  # Despawn items beyond this radius
-@export var min_spawn_distance_from_player: float = 400.0  # Min distance from player
+@export var spawn_radius: float = 3000.0  # Spawn items within this radius of player
+@export var despawn_radius: float = 4000.0  # Despawn items beyond this radius
+@export var min_spawn_distance_from_player: float = 800.0  # Min distance from player
 
 @export_group("Neutron Fields")
 @export var neutron_field_target_density: int = 3  # Target count near player
@@ -23,7 +23,7 @@ extends Node2D
 @export var hazard_scenes: Array[PackedScene] = []
 
 @export_group("Photons")
-@export var photon_target_density: int = 45
+@export var photon_target_density: int = 35
 @export var photon_spawn_distance_min: float = 200.0
 @export var photon_spawn_distance_max: float = 2000.0
 
