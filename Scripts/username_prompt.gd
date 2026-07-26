@@ -68,10 +68,13 @@ func _on_submit_pressed() -> void:
 		status_label.text = "Success: Signifier confirmed. Starting sequence..."
 		LeaderboardManager.player_username = username
 		
+		# Save username locally for future sessions
+		LeaderboardManager.save_username(username)
+		
 		# Short delay for visual feedback before loading game
 		await get_tree().create_timer(1.2).timeout
 		get_tree().change_scene_to_file("res://Scenes/game.tscn")
-
+	
 func _set_loading_state(active: bool) -> void:
 	is_checking = active
 	if input_field != null:

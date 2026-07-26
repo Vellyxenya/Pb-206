@@ -478,12 +478,19 @@ func show_victory_screen() -> void:
 	if victory_overlay != null:
 		victory_overlay.visible = true
 	if victory_score_display != null:
-		victory_score_display.text = "Final Score: " + str(current_score)
+		victory_score_display.text = "Final Score: " + str(current_score) + "\nUploading..."
 	
 	print("Victory! Reached stable Pb-206 with score: ", current_score)
 	
-	# Upload score to server
-	LeaderboardManager.upload_score(current_score)
+	# Upload score to server (await to ensure upload completes)
+	var upload_success = await LeaderboardManager.upload_score(current_score)
+	
+	# Update UI after upload attempt
+	if victory_score_display != null:
+		if upload_success:
+			victory_score_display.text = "Final Score: " + str(current_score) + "\n✓ Score uploaded!"
+		else:
+			victory_score_display.text = "Final Score: " + str(current_score) + "\n✗ Upload failed (offline?)"
 
 func handle_stable_isotope_victory() -> void:
 	"""Handle transition to stable Pb-206 isotope"""
@@ -589,10 +596,17 @@ func enter_game_over_state(death_cause: String = "Timer expired outside finish a
 	if game_over_overlay != null:
 		game_over_overlay.visible = true
 	if game_over_title != null:
-		game_over_title.text = "GAME OVER\n" + death_cause
+		game_over_title.text = "GAME OVER\n" + death_cause + "\n\nScore: " + str(current_score) + "\nUploading..."
 	
-	# Upload score to server
-	LeaderboardManager.upload_score(current_score)
+	# Upload score to server (await to ensure upload completes before allowing restart)
+	var upload_success = await LeaderboardManager.upload_score(current_score)
+	
+	# Update UI after upload attempt
+	if game_over_title != null:
+		if upload_success:
+			game_over_title.text = "GAME OVER\n" + death_cause + "\n\nScore: " + str(current_score) + "\n✓ Uploaded"
+		else:
+			game_over_title.text = "GAME OVER\n" + death_cause + "\n\nScore: " + str(current_score) + "\n✗ Upload failed (offline?)"
 
 func _on_collectible_collected(_collector: Node2D, points: int) -> void:
 	add_score(points)

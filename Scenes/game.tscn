@@ -143,7 +143,6 @@ mouse_filter = 2
 color = Color(1, 1, 1, 0)
 
 [node name="GameOverOverlay" type="ColorRect" parent="UI" unique_id=101614607]
-visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -160,9 +159,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -362.5
-offset_top = -120.0
+offset_top = -169.0
 offset_right = 362.5
-offset_bottom = 120.0
+offset_bottom = 169.0
 grow_horizontal = 2
 grow_vertical = 2
 

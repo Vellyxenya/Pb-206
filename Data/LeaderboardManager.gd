@@ -5,6 +5,59 @@ extends Node
 var player_username: String = ""
 var backend_url: String = "https://pb-206.onrender.com" # "http://127.0.0.1:3000"
 const REQUEST_TIMEOUT_SECONDS: float = 5.0
+const USERNAME_SAVE_PATH: String = "user://player_username.cfg"
+
+func _ready() -> void:
+	# Load username from local storage when the game starts
+	load_username()
+
+func save_username(username: String) -> bool:
+	"""Save username to local storage"""
+	if username.strip_edges().is_empty():
+		push_warning("Cannot save empty username")
+		return false
+	
+	var config = ConfigFile.new()
+	config.set_value("player", "username", username.strip_edges())
+	
+	var error = config.save(USERNAME_SAVE_PATH)
+	if error != OK:
+		push_error("Failed to save username to " + USERNAME_SAVE_PATH)
+		return false
+	
+	player_username = username.strip_edges()
+	print("Username saved locally: ", player_username)
+	return true
+
+func load_username() -> String:
+	"""Load username from local storage"""
+	var config = ConfigFile.new()
+	
+	# Check if file exists and load it
+	var error = config.load(USERNAME_SAVE_PATH)
+	if error != OK:
+		# File doesn't exist or couldn't be loaded
+		player_username = ""
+		return ""
+	
+	# Try to get the username value
+	if config.has_section_key("player", "username"):
+		var loaded_username = config.get_value("player", "username", "")
+		if loaded_username is String and not loaded_username.strip_edges().is_empty():
+			player_username = loaded_username.strip_edges()
+			print("Username loaded from local storage: ", player_username)
+			return player_username
+	
+	player_username = ""
+	return ""
+
+func clear_username() -> void:
+	"""Clear the saved username (for logout/reset)"""
+	player_username = ""
+	var dir = DirAccess.open("user://")
+	if dir and dir.file_exists(USERNAME_SAVE_PATH.replace("user://", "")):
+		dir.remove(USERNAME_SAVE_PATH.replace("user://", ""))
+		print("Username cleared from local storage")
 
 func _create_http_node() -> HTTPRequest:
 	var http = HTTPRequest.new()

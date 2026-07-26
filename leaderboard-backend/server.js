@@ -77,9 +77,9 @@ app.post('/score', (req, res) => {
       return res.status(400).json({ error: 'Username is required' });
     }
 
-    // Limit length (max 16 chars)
-    if (trimmedUsername.length > 16) {
-      return res.status(400).json({ error: 'Username must be 16 characters or less' });
+    // Limit length (max 18 chars)
+    if (trimmedUsername.length > 18) {
+      return res.status(400).json({ error: 'Username must be 18 characters or less' });
     }
 
     // Basic alphanumeric/safe characters check (optional but recommended for sanitization)
