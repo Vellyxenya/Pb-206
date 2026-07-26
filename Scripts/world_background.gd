@@ -20,11 +20,19 @@ func set_view_center(center: Vector2) -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var viewport_size = get_viewport_rect().size
-	var half_size = viewport_size * 0.5
-	var draw_top_left = -half_size - Vector2.ONE * viewport_padding
-	var draw_size = viewport_size + Vector2.ONE * viewport_padding * 2.0
+	if pattern_spacing <= 0.0 or dot_spacing_multiplier <= 0:
+		return
 
+	# Fix 1: Calculate actual visible world dimensions accounting for Camera Zoom
+	var cam = get_viewport().get_camera_2d()
+	var zoom = cam.zoom if cam else Vector2.ONE
+	var visible_world_size = get_viewport_rect().size / zoom
+
+	var half_size = visible_world_size * 0.5
+	var draw_top_left = -half_size - (Vector2.ONE * (viewport_padding / zoom.x))
+	var draw_size = visible_world_size + (Vector2.ONE * (viewport_padding / zoom.x) * 2.0)
+
+	# Draw solid background base
 	draw_rect(Rect2(draw_top_left, draw_size), base_color, true)
 
 	var world_left = view_center.x + draw_top_left.x
@@ -32,20 +40,23 @@ func _draw() -> void:
 	var world_top = view_center.y + draw_top_left.y
 	var world_bottom = world_top + draw_size.y
 
+	# Vertical Grid Lines
 	var first_vertical = floor(world_left / pattern_spacing) * pattern_spacing
 	var x = first_vertical
 	while x <= world_right + pattern_spacing:
 		var local_x = x - view_center.x
-		draw_line(Vector2(local_x, draw_top_left.y), Vector2(local_x, draw_top_left.y + draw_size.y), line_color, line_width, true)
+		draw_line(Vector2(local_x, draw_top_left.y), Vector2(local_x, draw_top_left.y + draw_size.y), line_color, line_width)
 		x += pattern_spacing
 
+	# Horizontal Grid Lines
 	var first_horizontal = floor(world_top / pattern_spacing) * pattern_spacing
 	var y = first_horizontal
 	while y <= world_bottom + pattern_spacing:
 		var local_y = y - view_center.y
-		draw_line(Vector2(draw_top_left.x, local_y), Vector2(draw_top_left.x + draw_size.x, local_y), line_color, line_width, true)
+		draw_line(Vector2(draw_top_left.x, local_y), Vector2(draw_top_left.x + draw_size.x, local_y), line_color, line_width)
 		y += pattern_spacing
 
+	# Grid Dots
 	var dot_spacing = pattern_spacing * float(dot_spacing_multiplier)
 	var first_dot_x = floor(world_left / dot_spacing) * dot_spacing
 	var first_dot_y = floor(world_top / dot_spacing) * dot_spacing
