@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://b5yqjgm1q1w8t" path="res://Scenes/ElectronField.tscn" id="5_i6g32"]
 [ext_resource type="AudioStream" uid="uid://b2y7wq120skir" path="res://Assets/Sounds/alpha_decay.mp3" id="10_o5yvi"]
 [ext_resource type="AudioStream" uid="uid://leslba7uwqbc" path="res://Assets/Sounds/beta_decay.mp3" id="11_rku1e"]
+[ext_resource type="AudioStream" uid="uid://mwwjv765ulty" path="res://Assets/Sounds/neutrino_collision.mp3" id="12_rku1e"]
 
 [node name="Game" type="Node2D" unique_id=1236288522]
 script = ExtResource("2_gamescript")
@@ -297,6 +298,9 @@ stream = ExtResource("10_o5yvi")
 
 [node name="BetaDecaySound" type="AudioStreamPlayer" parent="." unique_id=773413062]
 stream = ExtResource("11_rku1e")
+
+[node name="NeutrinoCollisionPlayer" type="AudioStreamPlayer" parent="." unique_id=1649294560]
+stream = ExtResource("12_rku1e")
 
 [connection signal="mouse_entered" from="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow/RestartButton" to="." method="_on_restart_button_mouse_entered"]
 [connection signal="mouse_entered" from="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow/MainMenuButton" to="." method="_on_main_menu_button_mouse_entered"]

@@ -16,8 +16,10 @@ signal cheat_decay_triggered
 @export var boost_speed_multiplier: float = 3.0
 @export var energy_drain_rate: float = 20.0  # Energy drained per second while boosting
 @export var energy_regen_rate: float = 2.0  # Energy regenerated per second when not boosting
-@export var min_energy_to_boost: float = 1.0  # Minimum energy required to start boosting
+@export var min_energy_to_boost: float = 5.0  # Minimum energy required to start boosting
 @export var boost_transition_speed: float = 7.0  # Speed of boost lerp transition
+
+@onready var boost_sound_player: AudioStreamPlayer = $BoostSoundPlayer
 
 var mass_number: int
 var external_force: Vector2 = Vector2.ZERO
@@ -341,6 +343,14 @@ func _handle_boost_input(delta: float) -> void:
 			if energy_bar != null:
 				energy_bar.value = current_energy
 				_update_energy_bar_color()
+				
+	var boost_sound_fade_speed := 2.0 # roughly 0.5 seconds
+	var target_volume = 0.0 if is_boosting else -80.0
+	boost_sound_player.volume_db = lerp(
+		boost_sound_player.volume_db,
+		target_volume,
+		boost_sound_fade_speed * delta
+	)
 	
 	# Smoothly transition speed multiplier
 	var target_multiplier = boost_speed_multiplier if is_boosting else 1.0

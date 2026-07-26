@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://k32p6gycnyrv" path="res://Scripts/atom.gd" id="1_cdecr"]
 [ext_resource type="Texture2D" uid="uid://bch7om8kf1s08" path="res://Assets/arrow_pb.png" id="2_arrow"]
+[ext_resource type="AudioStream" uid="uid://061khrfi6iqw" path="res://Assets/Sounds/boost_sound1.wav" id="3_0emeg"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_cdecr"]
 radius = 32.01562
@@ -59,3 +60,8 @@ theme_override_font_sizes/font_size = 32
 text = "+"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="BoostSoundPlayer" type="AudioStreamPlayer" parent="." unique_id=1478095429]
+stream = ExtResource("3_0emeg")
+volume_db = -80.0
+autoplay = true

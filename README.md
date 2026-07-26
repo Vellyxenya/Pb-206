@@ -44,14 +44,15 @@ This project uses a **milestone-based approach** with clear verification at each
    - Green arrival area should be more dangerous
    - Work on leaderboard
    - There should be more types of hazards
+   - Improve visual of Hazards
+   - Add VFX to hazards
 
    - Sometimes photons are not captured
    - Red Text should blink
+   - Should wait 1 more second before showing the game over screen
  
-   - Add alpha and beta decay sounds
-   - Add explosion sound when colliding with neutrino
    - Add sound when boosting
    - Add explanation about boosting and movement control
-   - Improve visual of Hazards
-   - Add VFX to hazards
-   - The decay transition animation should have an extra animation for the sampling of the Timer for the next phase. Something like: Time before next decay cycle: {randomly show fast changing numbers between min and max for 1 second or so}, and then show the sampled number.
+   - VFX while boosting
+
+

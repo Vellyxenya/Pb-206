@@ -55,6 +55,7 @@ var _next_phase_timer: float = -1.0  # Pre-sampled timer for next phase
 @onready var hover_sound_stream_player: AudioStreamPlayer2D = $UI/ButtonHoverSound
 @onready var alpha_decay_sound_player: AudioStreamPlayer = $AlphaDecaySound
 @onready var beta_decay_sound_player: AudioStreamPlayer = $BetaDecaySound
+@onready var neutrino_collision_player: AudioStreamPlayer = $NeutrinoCollisionPlayer
 
 func _ready() -> void:
 	add_to_group("game")  # Allow hazards to find the game node
@@ -583,6 +584,7 @@ func on_player_neutrino_death() -> void:
 	if is_game_over or is_transitioning:
 		return
 	print("Player hit by neutrino!")
+	neutrino_collision_player.play()
 	if atom != null and atom.has_method("play_destroy_animation"):
 		await atom.play_destroy_animation()
 	enter_game_over_state("Destroyed by neutrino collision!")
