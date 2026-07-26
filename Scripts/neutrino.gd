@@ -8,6 +8,7 @@ extends Area2D
 
 var direction: Vector2 = Vector2.RIGHT
 var _has_killed: bool = false
+var trajectory_multiplier: float = 1.0  # Scales trajectory line visibility (1.0 = full, 0.33 = harder to predict)
 
 @onready var trajectory_line: Line2D = $TrajectoryLine
 @onready var visual: Node2D = $Visual
@@ -26,8 +27,8 @@ func _update_trajectory_line() -> void:
 	if trajectory_line == null:
 		return
 	
-	# Calculate where the neutrino will be in 5 seconds
-	var trajectory_end = direction * speed * trajectory_line_duration
+	# Calculate where the neutrino will be (scaled by difficulty)
+	var trajectory_end = direction * speed * trajectory_line_duration * trajectory_multiplier
 	
 	# Set line points from current position to future position
 	trajectory_line.points = PackedVector2Array([

@@ -37,6 +37,7 @@ var _countdown_tween: Tween = null  # Tween for countdown animation
 @onready var timer_label: Label = $UI/PhaseTimerLabel
 @onready var score_label: Label = $UI/ScoreLabel
 @onready var goal_status_label: Label = $UI/GoalStatusLabel
+@onready var tutorial_container: VBoxContainer = $UI/TutorialContainer
 @onready var transition_flash: ColorRect = $UI/TransitionFlash
 @onready var game_over_overlay: ColorRect = $UI/GameOverOverlay
 @onready var game_over_title: Label = $UI/GameOverOverlay/GameOverPanel/GameOverContent/GameOverTitle
@@ -109,11 +110,13 @@ func _ready() -> void:
 	
 	# Spawn initial entities
 	if spawn_manager != null:
+		spawn_manager.set_current_phase(current_phase_index)
 		spawn_manager.spawn_initial_entities()
 		spawn_manager.connect_photon_signals(self)
 	_update_goal_area_visual()
 	_update_goal_status(false)
 	_update_goal_guidance(false)
+	_update_tutorial_visibility()
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Toggle pause with P or Esc keys
@@ -452,11 +455,15 @@ func advance_to_next_phase() -> void:
 
 	if spawn_manager != null:
 		spawn_manager.clear_all_entities()
+		spawn_manager.set_current_phase(current_phase_index)
 		spawn_manager.spawn_initial_entities()
 		spawn_manager.connect_photon_signals(self)
 	if atom != null:
 		atom.load_isotope_data()
 		atom.reset_phase_visuals()
+	
+	_update_tutorial_visibility()
+	_update_goal_danger_visual()  # Update goal area color for new phase
 
 func show_victory_screen() -> void:
 	is_game_over = true
@@ -545,12 +552,16 @@ func restart_current_phase() -> void:
 	if spawn_manager != null:
 		spawn_manager.set_process(true)  # Re-enable spawning
 		spawn_manager.clear_all_entities()
+		spawn_manager.set_current_phase(current_phase_index)
 		spawn_manager.spawn_initial_entities()
 		spawn_manager.connect_photon_signals(self)
 	if atom != null:
 		atom.set_charge(0)  # Reset to neutral on restart
 		atom.load_isotope_data()
 		atom.reset_phase_visuals()
+	
+	_update_tutorial_visibility()
+	_update_goal_danger_visual()  # Reset goal area color for level 1
 
 func enter_game_over_state(death_cause: String = "Timer expired outside finish area") -> void:
 	is_game_over = true
@@ -602,6 +613,11 @@ func add_score(points: int) -> void:
 func _update_score_display() -> void:
 	if score_label != null:
 		score_label.text = "Score: " + str(current_score)
+
+func _update_tutorial_visibility() -> void:
+	"""Show tutorial only on level 1"""
+	if tutorial_container != null:
+		tutorial_container.visible = (current_phase_index == 1)
 
 func _show_floating_score(points: int, spawn_pos: Vector2) -> void:
 	"""Create a floating text label showing score increase"""
@@ -696,6 +712,31 @@ func _fade_out_music() -> void:
 func _update_goal_area_visual() -> void:
 	if goal_area != null and spawn_manager != null:
 		goal_area.global_position = spawn_manager.goal_position
+	
+	# Add danger visual feedback based on current phase
+	_update_goal_danger_visual()
+
+func _update_goal_danger_visual() -> void:
+	"""Update goal area visual to indicate danger level"""
+	if goal_fill == null or goal_outline == null:
+		return
+	
+	# Calculate danger level (0.0 = safe level 1, 1.0 = dangerous level 14)
+	var danger_level = clamp(float(current_phase_index - 1) / 13.0, 0.0, 1.0)
+	
+	# Shift color from green to orange-red as danger increases
+	var base_green = Color(0.0, 0.8, 0.0, 0.25)
+	var danger_orange = Color(0.9, 0.4, 0.0, 0.35)
+	goal_fill.color = base_green.lerp(danger_orange, danger_level)
+	
+	# Make outline more intense with danger
+	var outline_green = Color(0.0, 1.0, 0.0, 0.6)
+	var outline_red = Color(1.0, 0.3, 0.0, 0.85)
+	goal_outline.default_color = outline_green.lerp(outline_red, danger_level)
+	
+	# Increase outline width with danger
+	var base_width = clamp(goal_radius * 0.05, 4.0, 18.0)
+	goal_outline.width = base_width * (1.0 + danger_level * 0.5)
 
 func _rebuild_goal_visual() -> void:
 	if goal_fill == null or goal_outline == null:
