@@ -137,16 +137,17 @@ stream = ExtResource("3_music")
 volume_db = -33.16
 autoplay = true
 
-[node name="UsernameDisplay" type="Label" parent="."]
+[node name="UsernameContainer" type="HBoxContainer" parent="."]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -320.0
+anchors_preset = 0
+offset_left = 20.0
 offset_top = 20.0
-offset_right = -20.0
+offset_right = 400.0
 offset_bottom = 52.0
-grow_horizontal = 0
+theme_override_constants/separation = 12
+
+[node name="UsernameDisplay" type="Label" parent="UsernameContainer"]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.85, 0.95, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.5)
 theme_override_constants/shadow_offset_x = 2
@@ -154,18 +155,10 @@ theme_override_constants/shadow_offset_y = 2
 theme_override_fonts/font = ExtResource("2_48xlc")
 theme_override_font_sizes/font_size = 20
 text = "Player: Username"
-horizontal_alignment = 2
 
-[node name="ChangeUsernameButton" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -320.0
-offset_top = 54.0
-offset_right = -220.0
-offset_bottom = 78.0
-grow_horizontal = 0
+[node name="ChangeUsernameButton" type="Button" parent="UsernameContainer"]
+custom_minimum_size = Vector2(80, 0)
+layout_mode = 2
 theme_override_colors/font_focus_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
 theme_override_colors/font_pressed_color = Color(0.38431373, 0.94509804, 0.23529412, 1)
 theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.23522937, 1)
@@ -181,5 +174,5 @@ volume_db = 10.551
 [connection signal="mouse_entered" from="Center/VBox/CreditsButton" to="." method="_on_credits_button_mouse_entered"]
 [connection signal="mouse_entered" from="Center/VBox/LeaderboardButton" to="." method="_on_leaderboard_button_mouse_entered"]
 [connection signal="mouse_entered" from="Center/VBox/QuitButton" to="." method="_on_quit_button_mouse_entered"]
-[connection signal="pressed" from="ChangeUsernameButton" to="." method="_on_change_username_pressed"]
-[connection signal="mouse_entered" from="ChangeUsernameButton" to="." method="_on_change_username_button_mouse_entered"]
+[connection signal="pressed" from="UsernameContainer/ChangeUsernameButton" to="." method="_on_change_username_pressed"]
+[connection signal="mouse_entered" from="UsernameContainer/ChangeUsernameButton" to="." method="_on_change_username_button_mouse_entered"]

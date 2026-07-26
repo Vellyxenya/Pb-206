@@ -9,6 +9,7 @@ extends Node2D
 @export var energy_per_photon: float = 6.0
 
 const GOAL_VISUAL_SEGMENTS: int = 64
+const PHASE_CLEAR_BONUS: int = 1_000_000
 
 var is_transitioning: bool = false
 var is_game_over: bool = false
@@ -427,6 +428,8 @@ func advance_to_next_phase() -> void:
 		var current_data = IsotopeData.get_isotope(atom.isotope_key)
 		
 		if not current_data.is_empty() and current_data.get("next_isotope") != null:
+			# Award a large bonus for each successful phase clear.
+			add_score(PHASE_CLEAR_BONUS)
 			var decay_type = current_data.get("decay_type", "alpha")
 			atom.isotope_key = str(current_data.next_isotope)
 			

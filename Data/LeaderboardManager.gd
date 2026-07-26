@@ -105,6 +105,7 @@ func upload_score(score: int) -> bool:
 	var http = _create_http_node()
 	var url = backend_url + "/score"
 	var headers = ["Content-Type: application/json"]
+	
 	var payload = {
 		"username": player_username,
 		"score": score

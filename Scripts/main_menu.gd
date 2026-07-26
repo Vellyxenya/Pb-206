@@ -8,12 +8,22 @@ var music_fade_tween: Tween = null
 @onready var quit_button: Button = $Center/VBox/QuitButton
 @onready var music_player: AudioStreamPlayer = $MusicPlayer
 @onready var hover_sound_stream_player: AudioStreamPlayer2D = $AudioStreamPlayer2D
-@onready var username_label: Label = $UsernameDisplay
-@onready var change_username_button: Button = $ChangeUsernameButton
+@onready var username_container: HBoxContainer = $UsernameContainer
+@onready var username_label: Label = $UsernameContainer/UsernameDisplay
+@onready var change_username_button: Button = $UsernameContainer/ChangeUsernameButton
 
 var target_volume = -100.0
 
 func _ready() -> void:
+	# Check for username first - redirect to prompt if not set
+	if LeaderboardManager.player_username.is_empty():
+		LeaderboardManager.load_username()
+	
+	if LeaderboardManager.player_username.is_empty():
+		# No username saved, redirect to username prompt immediately
+		get_tree().change_scene_to_file("res://Scenes/username_prompt.tscn")
+		return
+	
 	if start_button != null:
 		start_button.pressed.connect(_on_start_pressed)
 	if credits_button != null:
@@ -25,7 +35,7 @@ func _ready() -> void:
 	if change_username_button != null:
 		change_username_button.pressed.connect(_on_change_username_pressed)
 	
-	# Display username if available
+	# Display username
 	_update_username_display()
 	
 	# Fade in menu music
@@ -36,40 +46,23 @@ func _ready() -> void:
 
 func _update_username_display() -> void:
 	"""Update the username label with the current player username"""
-	if username_label == null:
+	if username_label == null or username_container == null:
 		return
 	
-	# Try to load username if not already loaded
-	if LeaderboardManager.player_username.is_empty():
-		LeaderboardManager.load_username()
-	
+	# Username should always exist when we reach this point (checked in _ready)
 	if not LeaderboardManager.player_username.is_empty():
 		username_label.text = "Player: " + LeaderboardManager.player_username
-		username_label.visible = true
-		if change_username_button != null:
-			change_username_button.visible = true
+		username_container.visible = true
 	else:
-		username_label.visible = false
-		if change_username_button != null:
-			change_username_button.visible = false
+		username_container.visible = false
 
 func _on_start_pressed() -> void:
 	Engine.time_scale = 1.0
 	
-	# Check if username is set, otherwise prompt for it
-	if LeaderboardManager.player_username.is_empty():
-		LeaderboardManager.load_username()
-	
-	if LeaderboardManager.player_username.is_empty():
-		# No username saved, go to username prompt
-		if music_player != null and music_player.playing:
-			await _fade_out_music()
-		get_tree().change_scene_to_file("res://Scenes/username_prompt.tscn")
-	else:
-		# Username exists, start game directly
-		if music_player != null and music_player.playing:
-			await _fade_out_music()
-		get_tree().change_scene_to_file("res://Scenes/game.tscn")
+	# Username is guaranteed to exist at this point (checked in _ready)
+	if music_player != null and music_player.playing:
+		await _fade_out_music()
+	get_tree().change_scene_to_file("res://Scenes/game.tscn")
 
 func _on_credits_pressed() -> void:
 	get_tree().change_scene_to_file("res://Scenes/credits.tscn")

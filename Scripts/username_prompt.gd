@@ -35,7 +35,7 @@ func _on_submit_pressed() -> void:
 	# Local Validation
 	if username.is_empty():
 		status_label.add_theme_color_override("font_color", Color(0.9, 0.35, 0.35))
-		status_label.text = "Error: Signifier cannot be empty."
+		status_label.text = "Error: Identifier cannot be empty."
 		return
 		
 	if username.length() > 18:
@@ -54,7 +54,7 @@ func _on_submit_pressed() -> void:
 		
 	_set_loading_state(true)
 	status_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
-	status_label.text = "Verifying signifier uniqueness in sequence core..."
+	status_label.text = "Verifying Identifier uniqueness in sequence core..."
 	
 	# Contact REST backend
 	var exists = await LeaderboardManager.check_username_exists(username)
@@ -62,19 +62,18 @@ func _on_submit_pressed() -> void:
 	if exists:
 		_set_loading_state(false)
 		status_label.add_theme_color_override("font_color", Color(0.95, 0.45, 0.2))
-		status_label.text = "Taken: Signifier already registered in core. Choose another."
+		status_label.text = "Taken: Identifier already registered in core. Choose another."
 	else:
 		status_label.add_theme_color_override("font_color", Color(0.3, 0.85, 0.45))
-		status_label.text = "Success: Signifier confirmed. Starting sequence..."
-		LeaderboardManager.player_username = username
-		
-		# Save username locally for future sessions
-		LeaderboardManager.save_username(username)
-		
-		# Short delay for visual feedback before loading game
-		await get_tree().create_timer(1.2).timeout
-		get_tree().change_scene_to_file("res://Scenes/game.tscn")
+	status_label.text = "Success: Identifier confirmed. Returning to main menu..."
+	LeaderboardManager.player_username = username
 	
+	# Save username locally for future sessions
+	LeaderboardManager.save_username(username)
+	
+	# Short delay for visual feedback before returning to main menu
+	await get_tree().create_timer(1.2).timeout
+	get_tree().change_scene_to_file("res://Scenes/main_menu.tscn")
 func _set_loading_state(active: bool) -> void:
 	is_checking = active
 	if input_field != null:
