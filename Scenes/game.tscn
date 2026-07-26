@@ -209,7 +209,6 @@ theme_override_colors/font_hover_color = Color(0.81050026, 0.94618183, 0.2352293
 text = "Main Menu"
 
 [node name="VictoryOverlay" type="ColorRect" parent="UI" unique_id=101614608]
-visible = false
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -219,6 +218,7 @@ mouse_filter = 1
 color = Color(0.08, 0.12, 0.05, 0.85)
 
 [node name="VictoryPanel" type="Panel" parent="UI/VictoryOverlay" unique_id=1695915014]
+visible = false
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -226,9 +226,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -420.0
-offset_top = -220.0
+offset_top = -249.0
 offset_right = 420.0
-offset_bottom = 284.0
+offset_bottom = 318.0
 grow_horizontal = 2
 grow_vertical = 2
 
