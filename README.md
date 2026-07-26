@@ -43,8 +43,15 @@ This project uses a **milestone-based approach** with clear verification at each
    - There should be less photons in the map
    - Green arrival area should be more dangerous
    - Work on leaderboard
+   - There should be more types of hazards
+
    - Sometimes photons are not captured
    - Red Text should blink
-   - Animation should explain what we decayed to.
-
-   - When decaying there should be a proper animation where an atom made out of 2 protons and 2 neutrons is ejected for an alpha decay. For a beta decay there should be a spark or something and an electron should be visually released. Only then (i guess after 2 seconds or so we should transition to the next phase).
+ 
+   - Add alpha and beta decay sounds
+   - Add explosion sound when colliding with neutrino
+   - Add sound when boosting
+   - Add explanation about boosting and movement control
+   - Improve visual of Hazards
+   - Add VFX to hazards
+   - The decay transition animation should have an extra animation for the sampling of the Timer for the next phase. Something like: Time before next decay cycle: {randomly show fast changing numbers between min and max for 1 second or so}, and then show the sampled number.

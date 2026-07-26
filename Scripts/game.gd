@@ -24,10 +24,13 @@ var game_over_sound: AudioStream = null
 var music_fade_tween: Tween = null  # Tween for music fade transitions
 var sfx_player: AudioStreamPlayer = null  # Sound effects player
 var blink_tween: Tween
+var _previous_finish_area_state: bool = false
+var _next_phase_timer: float = -1.0  # Pre-sampled timer for next phase
 
 @onready var atom: RigidBody2D = $Player/Atom
 @onready var camera: Camera2D = $Player/Atom/Camera2D
 @onready var background: Node2D = $Background
+@onready var ui_layer: CanvasLayer = $UI
 @onready var timer_label: Label = $UI/PhaseTimerLabel
 @onready var score_label: Label = $UI/ScoreLabel
 @onready var goal_status_label: Label = $UI/GoalStatusLabel
@@ -50,6 +53,8 @@ var blink_tween: Tween
 @onready var collectibles_root: Node2D = $Collectibles
 @onready var spawn_manager: Node2D = $SpawnManager
 @onready var hover_sound_stream_player: AudioStreamPlayer2D = $UI/ButtonHoverSound
+@onready var alpha_decay_sound_player: AudioStreamPlayer = $AlphaDecaySound
+@onready var beta_decay_sound_player: AudioStreamPlayer = $BetaDecaySound
 
 func _ready() -> void:
 	add_to_group("game")  # Allow hazards to find the game node
@@ -180,6 +185,13 @@ func start_phase_transition(success: bool, death_cause: String = "") -> void:
 			await atom.play_destroy_animation()
 
 	await play_transition_flash(success)
+	
+	if success:
+		var dt = IsotopeData.get_isotope(atom.isotope_key).get("decay_type", "unknown")
+		if "alpha" in dt:
+			alpha_decay_sound_player.play()
+		elif "beta" in dt:
+			beta_decay_sound_player.play()
 
 	if success:
 		advance_to_next_phase()
@@ -205,7 +217,7 @@ func play_transition_flash(success: bool) -> void:
 
 func show_decay_transition_text(current_data: Dictionary, decay_type: String) -> void:
 	"""Show animated text explaining the decay transition"""
-	if atom == null:
+	if atom == null or ui_layer == null:
 		return
 	
 	# Get next isotope info
@@ -220,14 +232,20 @@ func show_decay_transition_text(current_data: Dictionary, decay_type: String) ->
 	var current_name = current_data.get("name", "")
 	var next_name = next_data.get("name", "")
 	
-	# Create overlay container
+	# Pre-sample the timer for the next phase
+	var timer_range = next_data.get("timer_range", [60, 120])
+	var timer_min = float(timer_range[0])
+	var timer_max = float(timer_range[1])
+	_next_phase_timer = randf_range(timer_min, timer_max)
+	
+	# Create overlay container in screen space
 	var overlay = ColorRect.new()
 	overlay.name = "DecayTransitionOverlay"
-	overlay.color = Color(0, 0, 0, 0.7)
+	overlay.color = Color(0, 0, 0, 0.8)
 	overlay.anchor_right = 1.0
 	overlay.anchor_bottom = 1.0
-	overlay.z_index = 200
-	add_child(overlay)
+	overlay.z_index = 100  # Ensure it's on top of other UI elements
+	ui_layer.add_child(overlay)
 	
 	# Create container for text
 	var vbox = VBoxContainer.new()
@@ -279,6 +297,15 @@ func show_decay_transition_text(current_data: Dictionary, decay_type: String) ->
 	next_label.modulate = Color(1, 1, 1, 0)
 	vbox.add_child(next_label)
 	
+	# Timer label for decay cycle duration
+	var decay_timer_label = Label.new()
+	decay_timer_label.text = "Time before next decay: ???"
+	decay_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	decay_timer_label.add_theme_font_size_override("font_size", 28)
+	decay_timer_label.add_theme_color_override("font_color", Color(0.8, 0.8, 1.0, 1.0))
+	decay_timer_label.modulate = Color(1, 1, 1, 0)
+	vbox.add_child(decay_timer_label)
+	
 	# Strikethrough line for current isotope
 	var strikethrough = ColorRect.new()
 	strikethrough.color = Color(1.0, 0.3, 0.3, 0.9)
@@ -316,13 +343,45 @@ func show_decay_transition_text(current_data: Dictionary, decay_type: String) ->
 	seq_tween.tween_property(next_label, "modulate:a", 1.0, 0.4)
 	seq_tween.tween_property(next_label, "scale", Vector2(1.0, 1.0), 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	seq_tween.set_parallel(false)
-	seq_tween.tween_interval(0.6)
+	seq_tween.tween_interval(0.3)
 	
-	# 6. Fade out everything (0.3s)
+	# 6. Fade in timer label and animate random numbers (1.2s)
+	seq_tween.tween_property(decay_timer_label, "modulate:a", 1.0, 0.2)
+	seq_tween.tween_callback(func():
+		# Rapidly show random numbers for 1 second
+		var timer_anim_tween = create_tween()
+		var random_duration = 1.0
+		var update_interval = 0.05  # Update every 50ms for fast changing effect
+		var updates = int(random_duration / update_interval)
+		
+		for i in range(updates):
+			timer_anim_tween.tween_callback(func():
+				var random_time = randf_range(timer_min, timer_max)
+				decay_timer_label.text = "Time before next decay: " + str(snapped(random_time, 0.1)) + "s"
+			)
+			timer_anim_tween.tween_interval(update_interval)
+		
+		# Show the final sampled value
+		timer_anim_tween.tween_callback(func():
+			decay_timer_label.text = "Time before next decay: " + str(snapped(_next_phase_timer, 0.1)) + "s"
+			decay_timer_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3, 1.0))  # Highlight final value
+		)
+	)
+	seq_tween.tween_interval(1.4)  # Wait for random animation to complete
+	
+	# 7. Fade out everything (0.3s)
 	seq_tween.tween_property(overlay, "modulate:a", 0.0, 0.3)
 	
 	await seq_tween.finished
 	overlay.queue_free()
+
+func get_next_phase_timer() -> float:
+	"""Get the pre-sampled timer value for the next phase"""
+	return _next_phase_timer
+
+func clear_next_phase_timer() -> void:
+	"""Clear the pre-sampled timer value after use"""
+	_next_phase_timer = -1.0
 
 func advance_to_next_phase() -> void:
 	is_game_over = false

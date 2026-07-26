@@ -9,6 +9,8 @@
 [ext_resource type="PackedScene" path="res://Scenes/SpawnManager.tscn" id="4_spawn"]
 [ext_resource type="PackedScene" uid="uid://c6w7d5q1dqo1t" path="res://Scenes/ProtonField.tscn" id="4_wowpa"]
 [ext_resource type="PackedScene" uid="uid://b5yqjgm1q1w8t" path="res://Scenes/ElectronField.tscn" id="5_i6g32"]
+[ext_resource type="AudioStream" uid="uid://b2y7wq120skir" path="res://Assets/Sounds/alpha_decay.mp3" id="10_o5yvi"]
+[ext_resource type="AudioStream" uid="uid://leslba7uwqbc" path="res://Assets/Sounds/beta_decay.mp3" id="11_rku1e"]
 
 [node name="Game" type="Node2D" unique_id=1236288522]
 script = ExtResource("2_gamescript")
@@ -289,6 +291,12 @@ position = Vector2(316, 728)
 
 [node name="ElectronField" parent="." unique_id=584002437 instance=ExtResource("5_i6g32")]
 position = Vector2(429, -208)
+
+[node name="AlphaDecaySound" type="AudioStreamPlayer" parent="." unique_id=351514655]
+stream = ExtResource("10_o5yvi")
+
+[node name="BetaDecaySound" type="AudioStreamPlayer" parent="." unique_id=773413062]
+stream = ExtResource("11_rku1e")
 
 [connection signal="mouse_entered" from="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow/RestartButton" to="." method="_on_restart_button_mouse_entered"]
 [connection signal="mouse_entered" from="UI/GameOverOverlay/GameOverPanel/GameOverContent/ButtonRow/MainMenuButton" to="." method="_on_main_menu_button_mouse_entered"]

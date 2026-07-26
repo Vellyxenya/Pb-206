@@ -358,8 +358,20 @@ func load_isotope_data():
 	proton_tint = IsotopeData.get_proton_tint(isotope_key)
 	mass = max(1.0, float(mass_number - 200))
 	
-	var timer_range = data.timer_range
-	phase_time_total = randf_range(float(timer_range[0]), float(timer_range[1]))
+	# Use pre-sampled timer from game if available, otherwise sample new one
+	var game_node = get_tree().get_first_node_in_group("game")
+	if game_node != null and game_node.has_method("get_next_phase_timer"):
+		var pre_sampled = game_node.get_next_phase_timer()
+		if pre_sampled > 0:
+			phase_time_total = pre_sampled
+			game_node.clear_next_phase_timer()  # Clear it after use
+		else:
+			var timer_range = data.timer_range
+			phase_time_total = randf_range(float(timer_range[0]), float(timer_range[1]))
+	else:
+		var timer_range = data.timer_range
+		phase_time_total = randf_range(float(timer_range[0]), float(timer_range[1]))
+	
 	phase_time_left = phase_time_total
 	phase_active = true
 	
