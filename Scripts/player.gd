@@ -13,6 +13,9 @@ func _input(event: InputEvent) -> void:
 func _physics_process(_delta):
 	if atom != null and atom.has_method("drive_towards"):
 		atom.drive_towards(get_global_mouse_position())
+	
+	# Update boost particles every frame
+	_update_boost_particles()
 
 func _update_boost_particles() -> void:
 	"""Update boost particle emission based on atom state"""

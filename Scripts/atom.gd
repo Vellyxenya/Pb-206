@@ -15,7 +15,7 @@ signal cheat_decay_triggered
 @export var max_energy: float = 180.0
 @export var boost_speed_multiplier: float = 2.5
 @export var energy_drain_rate: float = 40.0  # Energy drained per second while boosting
-@export var energy_regen_rate: float = 1.0  # Energy regenerated per second when not boosting
+@export var energy_regen_rate: float = 2.0  # Energy regenerated per second when not boosting
 @export var min_energy_to_boost: float = 5.0  # Minimum energy required to start boosting
 @export var boost_transition_speed: float = 7.0  # Speed of boost lerp transition
 
@@ -41,6 +41,7 @@ var current_energy: float = 0.0
 var energy_bar: ProgressBar = null
 var is_boosting: bool = false
 var current_speed_multiplier: float = 1.0
+var boost_locked_out: bool = false  # True when energy depleted, requires button release to unlock
 
 
 func _integrate_forces(state: PhysicsDirectBodyState2D) -> void:
@@ -57,6 +58,7 @@ func _ready():
 	
 	# Start with full energy
 	current_energy = max_energy
+	boost_locked_out = false  # Start unlocked
 
 	load_isotope_data()
 	mass = max(1.0, float(mass_number - 200))
@@ -254,6 +256,7 @@ func reset_phase_visuals() -> void:
 	spawn_nuclei()
 	# Start with full energy on phase transition
 	current_energy = max_energy
+	boost_locked_out = false  # Reset boost lock on phase change
 	if energy_bar != null:
 		energy_bar.value = current_energy
 		_update_energy_bar_color()
@@ -323,28 +326,36 @@ func _handle_boost_input(delta: float) -> void:
 	"""Handle boost mechanic with left mouse button"""
 	# Check if left mouse button is pressed and we have enough energy
 	var wants_to_boost = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-	var can_boost = current_energy >= min_energy_to_boost
+	var has_enough_energy = current_energy >= min_energy_to_boost
 	
-	if wants_to_boost and can_boost:
+	# If button was released, unlock boost (allow boosting again)
+	if not wants_to_boost:
+		boost_locked_out = false
+	
+	# Can only boost if: wants to boost, has energy, and not locked out
+	var can_boost = wants_to_boost and has_enough_energy and not boost_locked_out
+	
+	if can_boost:
 		is_boosting = true
 		# Drain energy while boosting
 		current_energy = max(0.0, current_energy - energy_drain_rate * delta)
 		if energy_bar != null:
 			energy_bar.value = current_energy
 			_update_energy_bar_color()
+		
+		# If energy depleted, lock out boosting until button release
+		if current_energy <= 0.0:
+			is_boosting = false
+			boost_locked_out = true
 	else:
-		# Can't boost or button released
-		if is_boosting and current_energy <= 0.0:
-			is_boosting = false  # Energy depleted
-		elif not wants_to_boost:
-			is_boosting = false  # Button released
+		# Stop boosting
+		is_boosting = false
 		
 		# Regenerate energy when not boosting
-		if not is_boosting:
-			current_energy = min(max_energy, current_energy + energy_regen_rate * delta)
-			if energy_bar != null:
-				energy_bar.value = current_energy
-				_update_energy_bar_color()
+		current_energy = min(max_energy, current_energy + energy_regen_rate * delta)
+		if energy_bar != null:
+			energy_bar.value = current_energy
+			_update_energy_bar_color()
 				
 	var boost_sound_fade_speed := 2.0 # roughly 0.5 seconds
 	var target_volume = 0.0 if is_boosting else -80.0
