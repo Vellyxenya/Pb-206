@@ -39,9 +39,3 @@ This project uses a **milestone-based approach** with clear verification at each
 
 
 
-   ## TODO
-   - There should be more types of hazards
-   - Improve visual of Hazards
-
-
-

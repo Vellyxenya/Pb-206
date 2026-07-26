@@ -8,18 +8,18 @@ extends Node2D
 @export var goal_radius: float = 1200.0
 @export var min_goal_edge_distance: float = 900.0
 @export var max_goal_center_distance: float = 5200.0
-@export var goal_area_neutrino_multiplier: float = 2.0  # Extra neutrinos in goal area
-@export var goal_area_hazard_count: int = 2  # Neutron fields near goal
+@export var goal_area_neutrino_multiplier: float = 1.6  # Extra neutrinos in goal area
+@export var goal_area_hazard_count: int = 1  # Neutron fields near goal
 
 @export_group("Spawn Area")
-@export var spawn_check_interval: float = 1.0  # How often to check spawn needs
+@export var spawn_check_interval: float = 0.5  # How often to check spawn needs
 @export var spawn_radius: float = 3000.0  # Spawn items within this radius of player
 @export var despawn_radius: float = 4000.0  # Despawn items beyond this radius
 @export var min_spawn_distance_from_player: float = 1200.0  # Min distance from player
 
 @export_group("Neutron Fields")
 @export var neutron_field_first_level: int = 0  # Level 1 density
-@export var neutron_field_last_level: int = 6  # Level 14 density
+@export var neutron_field_last_level: int = 4  # Level 14 density
 
 @export_group("Force Fields")
 @export var force_field_first_level: int = 0  # Level 1 density
@@ -27,16 +27,16 @@ extends Node2D
 @export var hazard_scenes: Array[PackedScene] = []
 
 @export_group("Photons")
-@export var photon_first_level: int = 20  # Level 1 density
-@export var photon_last_level: int = 50  # Level 14 density
+@export var photon_first_level: int = 30  # Level 1 density
+@export var photon_last_level: int = 90  # Level 14 density
 @export var photon_spawn_distance_min: float = 200.0
 @export var photon_spawn_distance_max: float = 2000.0
 
 @export_group("Neutrinos")
 @export var neutrino_first_level: int = 0  # Level 1 density
-@export var neutrino_last_level: int = 60  # Level 14 density
+@export var neutrino_last_level: int = 28  # Level 14 density
 @export var neutrino_speed_min: float = 300.0
-@export var neutrino_speed_max: float = 500.0
+@export var neutrino_speed_max: float = 450.0
 
 # Scene references
 const PhotonScene = preload("res://Scenes/photon.tscn")

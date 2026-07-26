@@ -9,7 +9,7 @@ var isotopes = {
 		"neutrons": 146,
 		"decay_type": "alpha",
 		"next_isotope": "Th-234",
-		"timer_range": [60, 60],  # 1 minute
+		"timer_range": [70, 70],  # 1 minute
 		"disk_radius": 70.0,
 		"sprite_color": Color(0.2, 0.8, 0.3),  # green
 		"proton_tint": Color(0.95, 0.25, 0.25)  # red
