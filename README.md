@@ -48,11 +48,8 @@ This project uses a **milestone-based approach** with clear verification at each
    - Add VFX to hazards
 
    - Sometimes photons are not captured
-   - Red Text should blink
-   - Should wait 1 more second before showing the game over screen
  
-   - Add sound when boosting
-   - Add explanation about boosting and movement control
+   - Add explanation about boosting and movement control. Tutorial?
    - VFX while boosting
 
 

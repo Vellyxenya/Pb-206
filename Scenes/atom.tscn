@@ -16,7 +16,7 @@ script = ExtResource("1_cdecr")
 shape = SubResource("CircleShape2D_cdecr")
 
 [node name="GoalArrow" type="Sprite2D" parent="." unique_id=116401204]
-visible = false
+modulate = Color(0.9024602, 0, 0.3839351, 1)
 z_index = 20
 position = Vector2(0, -115)
 scale = Vector2(0.24, 0.24)

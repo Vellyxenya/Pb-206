@@ -12,10 +12,6 @@ shader_parameter/white_threshold = 0.92
 shader_parameter/target_gray = 0.811765
 shader_parameter/gray_tolerance = 0.18
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_destroy_2"]
-atlas = ExtResource("1_gyxa0")
-region = Rect2(128, 384, 128, 128)
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_destroy_3"]
 atlas = ExtResource("1_gyxa0")
 region = Rect2(256, 384, 128, 128)
@@ -79,9 +75,6 @@ region = Rect2(0, 128, 128, 128)
 [sub_resource type="SpriteFrames" id="SpriteFrames_sfggm"]
 animations = [{
 "frames": [{
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_destroy_2")
-}, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_destroy_3")
 }, {
@@ -153,7 +146,7 @@ script = ExtResource("1_vt7ja")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1916345401]
 material = SubResource("ShaderMaterial_47j3p")
 sprite_frames = SubResource("SpriteFrames_sfggm")
-animation = &"spawn"
+animation = &"destroy"
 autoplay = "spawn"
 
 [node name="ChargeIndicator" type="Label" parent="AnimatedSprite2D" unique_id=2082943904]

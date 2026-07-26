@@ -24,8 +24,8 @@ var game_over_sound: AudioStream = null
 var music_fade_tween: Tween = null  # Tween for music fade transitions
 var sfx_player: AudioStreamPlayer = null  # Sound effects player
 var blink_tween: Tween
-var _previous_finish_area_state: bool = false
 var _next_phase_timer: float = -1.0  # Pre-sampled timer for next phase
+var last_finish_state := true
 
 @onready var atom: RigidBody2D = $Player/Atom
 @onready var camera: Camera2D = $Player/Atom/Camera2D
@@ -524,11 +524,14 @@ func enter_game_over_state(death_cause: String = "Timer expired outside finish a
 	if phase_audio_player != null and phase_audio_player.playing:
 		_fade_out_music()
 	
+	# Wait before showing game over screen
+	await get_tree().create_timer(0.5).timeout
+	
 	# Play game over sound effect
 	if sfx_player != null and game_over_sound != null:
 		sfx_player.stream = game_over_sound
 		sfx_player.play()
-	
+		
 	if game_over_overlay != null:
 		game_over_overlay.visible = true
 	if game_over_title != null:
@@ -680,19 +683,31 @@ func _start_blink() -> void:
 func _stop_blink() -> void:
 	if blink_tween:
 		blink_tween.kill()
-		goal_status_label.modulate.a = 1.0
+		blink_tween = null
+
+	goal_status_label.modulate.a = 1.0
 
 func _update_goal_status(in_finish_area: bool) -> void:
 	if goal_status_label == null:
 		return
 
+	# Only change color/text every frame, but don't restart blink
 	goal_status_label.text = "Finish Area: IN" if in_finish_area else "Finish Area: OUT. Hurry to the area before the timer runs out!"
-	goal_status_label.modulate = Color(0.18, 0.62, 0.22) if in_finish_area else Color(0.82, 0.2, 0.2)
 
+	var alpha = goal_status_label.modulate.a
 	if in_finish_area:
-		_stop_blink()
+		goal_status_label.modulate = Color(0.18, 0.62, 0.22, alpha)
 	else:
-		_start_blink()
+		goal_status_label.modulate = Color(0.82, 0.2, 0.2, alpha)
+
+	# Only start/stop blinking when state changes
+	if in_finish_area != last_finish_state:
+		if in_finish_area:
+			_stop_blink()
+		else:
+			_start_blink()
+
+	last_finish_state = in_finish_area
 
 func _update_goal_guidance(in_finish_area: bool) -> void:
 	if atom == null or goal_arrow == null or goal_distance_label == null or spawn_manager == null:
@@ -756,7 +771,7 @@ func _setup_phase_audio() -> void:
 		push_warning("Victory music not found!")
 	
 	# Load game over sound
-	game_over_sound = load("res://Assets/Sounds/gameover.wav") as AudioStream
+	game_over_sound = load("res://Assets/Sounds/gameover.mp3") as AudioStream
 	if game_over_sound == null:
 		push_warning("Game over sound not found!")
 
