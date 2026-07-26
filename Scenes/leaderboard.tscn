@@ -78,7 +78,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_fonts/font = ExtResource("2_bold")
 theme_override_font_sizes/font_size = 18
-text = "Isotope Signifier"
+text = "Isotope Identifier"
 
 [node name="Score" type="Label" parent="Center/VBox/HeaderPanel/Headers" unique_id=1236456299]
 custom_minimum_size = Vector2(160, 0)

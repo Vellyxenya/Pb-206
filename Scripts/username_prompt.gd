@@ -38,9 +38,9 @@ func _on_submit_pressed() -> void:
 		status_label.text = "Error: Signifier cannot be empty."
 		return
 		
-	if username.length() > 16:
+	if username.length() > 18:
 		status_label.add_theme_color_override("font_color", Color(0.9, 0.35, 0.35))
-		status_label.text = "Error: Max length is 16 characters."
+		status_label.text = "Error: Max length is 18 characters."
 		return
 		
 	# Check basic alphanumeric/safe characters

@@ -3,7 +3,7 @@ extends Node
 # Autoload singleton for communicating with the leaderboard backend
 
 var player_username: String = ""
-var backend_url: String = "http://127.0.0.1:3000"
+var backend_url: String = "https://pb-206.onrender.com" # "http://127.0.0.1:3000"
 const REQUEST_TIMEOUT_SECONDS: float = 5.0
 
 func _create_http_node() -> HTTPRequest:

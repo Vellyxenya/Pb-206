@@ -44,8 +44,6 @@ This project uses a **milestone-based approach** with clear verification at each
    - Green arrival area should be more dangerous
    - There should be more types of hazards
    - Improve visual of Hazards
-
-   - Work on leaderboard
  
    - Add explanation about boosting and movement control. Tutorial?
 
