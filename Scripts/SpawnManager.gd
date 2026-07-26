@@ -52,6 +52,7 @@ var player: Node2D = null
 var camera: Camera2D = null
 var hazards_root: Node2D = null
 var collectibles_root: Node2D = null
+var game_node: Node = null
 
 func _process(delta: float) -> void:
 	_spawn_check_timer -= delta
@@ -61,12 +62,13 @@ func _process(delta: float) -> void:
 		_check_and_spawn_entities()
 		_despawn_distant_entities()
 
-func setup_references(p_player: Node2D, p_camera: Camera2D, p_hazards_root: Node2D, p_collectibles_root: Node2D) -> void:
+func setup_references(p_player: Node2D, p_camera: Camera2D, p_hazards_root: Node2D, p_collectibles_root: Node2D, p_game: Node) -> void:
 	"""Called by game to set up required node references"""
 	player = p_player
 	camera = p_camera
 	hazards_root = p_hazards_root
 	collectibles_root = p_collectibles_root
+	game_node = p_game
 
 func spawn_initial_entities() -> void:
 	"""Spawn initial set of entities at game start"""
@@ -210,9 +212,13 @@ func _spawn_photons(count: int) -> void:
 		var photon = PhotonScene.instantiate()
 		photon.position = _pick_collectible_position()
 		photon.move_direction = Vector2.from_angle(randf() * TAU).normalized()
-		# Connect collected signal to game
 		collectibles_root.add_child(photon)
 		collectibles.append(photon)
+		
+		# Connect collected signal to game immediately
+		if game_node != null and photon.has_signal("collected"):
+			if not photon.collected.is_connected(game_node._on_collectible_collected):
+				photon.collected.connect(game_node._on_collectible_collected)
 
 func _spawn_neutrinos(count: int) -> void:
 	if hazards_root == null or player == null or count <= 0:

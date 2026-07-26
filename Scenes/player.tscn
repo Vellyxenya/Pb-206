@@ -3,6 +3,22 @@
 [ext_resource type="Script" uid="uid://w7ym7veiniy0" path="res://Scripts/player.gd" id="1_0q8th"]
 [ext_resource type="PackedScene" uid="uid://cxqbtqjhdqt4k" path="res://Scenes/atom.tscn" id="2_ehw5f"]
 
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_cvnsp"]
+lifetime_randomness = 0.5
+particle_flag_disable_z = true
+emission_shape = 1
+emission_sphere_radius = 70.0
+direction = Vector3(0, 0, 0)
+spread = 25.0
+initial_velocity_min = 80.0
+initial_velocity_max = 150.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
+gravity = Vector3(0, 0, 0)
+linear_accel_min = -50.0
+linear_accel_max = -50.0
+scale_max = 2.5
+
 [node name="Player" type="Node2D" unique_id=518713802]
 script = ExtResource("1_0q8th")
 
@@ -12,3 +28,13 @@ script = ExtResource("1_0q8th")
 zoom = Vector2(0.6, 0.6)
 position_smoothing_enabled = true
 position_smoothing_speed = 6.0
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=424961744]
+modulate = Color(0.6372355, 0.5888089, 1, 1)
+emitting = false
+amount = 32
+lifetime = 0.8
+randomness = 0.66
+trail_enabled = true
+trail_lifetime = 0.4
+process_material = SubResource("ParticleProcessMaterial_cvnsp")

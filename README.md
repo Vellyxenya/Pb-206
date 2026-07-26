@@ -42,14 +42,14 @@ This project uses a **milestone-based approach** with clear verification at each
    ## TODO
    - There should be less photons in the map
    - Green arrival area should be more dangerous
-   - Work on leaderboard
    - There should be more types of hazards
    - Improve visual of Hazards
-   - Add VFX to hazards
 
    - Sometimes photons are not captured
+   - VFX while boosting
+   - Work on leaderboard
  
    - Add explanation about boosting and movement control. Tutorial?
-   - VFX while boosting
+
 
 

@@ -62,7 +62,7 @@ func _ready() -> void:
 	
 	# Setup spawn manager
 	if spawn_manager != null:
-		spawn_manager.setup_references(atom, camera, hazards_root, collectibles_root)
+		spawn_manager.setup_references(atom, camera, hazards_root, collectibles_root, self)
 		spawn_manager.goal_radius = goal_radius
 	
 	if atom != null:
