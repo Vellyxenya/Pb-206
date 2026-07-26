@@ -15,6 +15,45 @@ script = ExtResource("1_cdecr")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=43329047]
 shape = SubResource("CircleShape2D_cdecr")
 
+[node name="IsotopeNameLabel" type="Label" parent="CollisionShape2D" unique_id=968642632]
+z_index = 25
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -113.0
+offset_top = -214.0
+offset_right = 114.0
+offset_bottom = -164.0
+grow_horizontal = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.40832946, 0.40832946, 0.40832946, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 36
+text = "Uranium-238"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ChargeIndicator" type="Label" parent="CollisionShape2D/IsotopeNameLabel" unique_id=344552022]
+visible = false
+z_index = 30
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -6.0
+offset_top = -21.0
+offset_right = 34.0
+offset_bottom = 24.0
+grow_horizontal = 0
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 32
+text = "+"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="GoalArrow" type="Sprite2D" parent="." unique_id=116401204]
 modulate = Color(0.9024602, 0, 0.3839351, 1)
 z_index = 20
@@ -31,35 +70,6 @@ offset_right = 70.0
 offset_bottom = -134.0
 theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
-
-[node name="IsotopeNameLabel" type="Label" parent="." unique_id=968642632]
-z_index = 25
-offset_left = -114.0
-offset_top = -207.0
-offset_right = 113.0
-offset_bottom = -157.0
-theme_override_colors/font_color = Color(0.40832946, 0.40832946, 0.40832946, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 36
-text = "Uranium-238"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ChargeIndicator" type="Label" parent="." unique_id=344552022]
-visible = false
-z_index = 30
-offset_left = 106.0
-offset_top = -194.0
-offset_right = 146.0
-offset_bottom = -149.0
-theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
-theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 32
-text = "+"
-horizontal_alignment = 1
-vertical_alignment = 1
 
 [node name="BoostSoundPlayer" type="AudioStreamPlayer" parent="." unique_id=1478095429]
 stream = ExtResource("3_0emeg")

@@ -20,6 +20,8 @@ signal cheat_decay_triggered
 @export var boost_transition_speed: float = 7.0  # Speed of boost lerp transition
 
 @onready var boost_sound_player: AudioStreamPlayer = $BoostSoundPlayer
+@onready var name_label: Label = $CollisionShape2D/IsotopeNameLabel
+@onready var charge_label: Label = $CollisionShape2D/IsotopeNameLabel/ChargeIndicator
 
 var mass_number: int
 var external_force: Vector2 = Vector2.ZERO
@@ -467,12 +469,10 @@ func set_charge(new_charge: int) -> void:
 
 func _update_charge_visual() -> void:
 	# Update the isotope name label
-	var name_label = get_node_or_null("IsotopeNameLabel") as Label
 	if name_label != null:
 		name_label.text = isotope_name
 	
 	# Update the charge indicator label
-	var charge_label = get_node_or_null("ChargeIndicator") as Label
 	if charge_label != null:
 		if charge > 0:
 			charge_label.text = "+"

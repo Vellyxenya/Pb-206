@@ -26,6 +26,8 @@ var sfx_player: AudioStreamPlayer = null  # Sound effects player
 var blink_tween: Tween
 var _next_phase_timer: float = -1.0  # Pre-sampled timer for next phase
 var last_finish_state := true
+var _last_countdown_second: int = -1  # Track last shown countdown second
+var _countdown_tween: Tween = null  # Tween for countdown animation
 
 @onready var atom: RigidBody2D = $Player/Atom
 @onready var camera: Camera2D = $Player/Atom/Camera2D
@@ -56,6 +58,8 @@ var last_finish_state := true
 @onready var alpha_decay_sound_player: AudioStreamPlayer = $AlphaDecaySound
 @onready var beta_decay_sound_player: AudioStreamPlayer = $BetaDecaySound
 @onready var neutrino_collision_player: AudioStreamPlayer = $NeutrinoCollisionPlayer
+@onready var countdown_timer_label: Label = $UI/CountdownTimerLabel
+@onready var beep_sound_player: AudioStreamPlayer = $BeepSoundPlayer
 
 func _ready() -> void:
 	add_to_group("game")  # Allow hazards to find the game node
@@ -130,6 +134,9 @@ func _process(_delta):
 			decay_display = decay_type
 		
 		timer_label.text = "Phase " + str(current_phase_index) + "/14: " + isotope_name + " (" + decay_display + ")\nTime: " + str(snapped(time_left, 0.1))
+		
+		# Update countdown timer in last 10 seconds
+		_update_countdown_timer(time_left)
 
 	var in_finish_area := is_atom_in_finish_area()
 	_update_goal_area_visual()
@@ -169,6 +176,13 @@ func start_phase_transition(success: bool, death_cause: String = "") -> void:
 	if is_transitioning or is_game_over:
 		return
 	is_transitioning = true
+	
+	# Hide and reset countdown timer
+	if countdown_timer_label != null:
+		countdown_timer_label.visible = false
+	_last_countdown_second = -1
+	if _countdown_tween:
+		_countdown_tween.kill()
 
 	if success:
 		print("Phase success: atom in finish area at timer end.")
@@ -467,6 +481,11 @@ func handle_stable_isotope_victory() -> void:
 	# Hide UI elements
 	if timer_label != null:
 		timer_label.visible = false
+	if countdown_timer_label != null:
+		countdown_timer_label.visible = false
+		_last_countdown_second = -1
+	if _countdown_tween:
+		_countdown_tween.kill()
 	if goal_status_label != null:
 		goal_status_label.visible = false
 	if goal_arrow != null:
@@ -519,6 +538,13 @@ func restart_current_phase() -> void:
 func enter_game_over_state(death_cause: String = "Timer expired outside finish area") -> void:
 	is_game_over = true
 	Engine.time_scale = game_over_time_scale
+	
+	# Hide and reset countdown timer
+	if countdown_timer_label != null:
+		countdown_timer_label.visible = false
+	_last_countdown_second = -1
+	if _countdown_tween:
+		_countdown_tween.kill()
 	
 	# Fade out level music
 	if phase_audio_player != null and phase_audio_player.playing:
@@ -708,6 +734,55 @@ func _update_goal_status(in_finish_area: bool) -> void:
 			_start_blink()
 
 	last_finish_state = in_finish_area
+func _update_countdown_timer(time_left: float) -> void:
+	"""Show and animate countdown timer in last 10 seconds"""
+	if countdown_timer_label == null:
+		return
+	
+	if time_left <= 10.0 and time_left > 0.0:
+		# Show countdown
+		var current_second = int(ceil(time_left))
+		
+		if current_second != _last_countdown_second:
+			# New second - update and animate
+			_last_countdown_second = current_second
+			countdown_timer_label.text = str(current_second)
+			countdown_timer_label.visible = true
+			
+			# Play beep sound
+			if beep_sound_player != null:
+				beep_sound_player.play()
+			
+			# Animate scale and color
+			_animate_countdown_number()
+	else:
+		# Hide countdown when not in last 10 seconds
+		if countdown_timer_label.visible:
+			countdown_timer_label.visible = false
+			_last_countdown_second = -1
+
+func _animate_countdown_number() -> void:
+	"""Animate countdown number with scale up and color transition"""
+	if countdown_timer_label == null:
+		return
+	
+	# Kill existing tween
+	if _countdown_tween:
+		_countdown_tween.kill()
+	
+	# Reset initial state
+	countdown_timer_label.scale = Vector2(0.5, 0.5)
+	countdown_timer_label.modulate = Color.WHITE
+	
+	# Create animation tween
+	_countdown_tween = create_tween()
+	_countdown_tween.set_parallel(true)
+	
+	# Scale up over 1 second
+	_countdown_tween.tween_property(countdown_timer_label, "scale", Vector2(1.0, 1.0), 1.0).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	
+	# Color transition from white to orange
+	_countdown_tween.tween_property(countdown_timer_label, "modulate", Color(1.0, 0.5, 0.0, 1.0), 1.0).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 
 func _update_goal_guidance(in_finish_area: bool) -> void:
 	if atom == null or goal_arrow == null or goal_distance_label == null or spawn_manager == null:

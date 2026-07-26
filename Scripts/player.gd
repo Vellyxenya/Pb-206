@@ -10,6 +10,10 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_Y and atom.has_method("teleport_towards"):
 		atom.teleport_towards(get_global_mouse_position(), 100.0)
 
+func _physics_process(_delta):
+	if atom != null and atom.has_method("drive_towards"):
+		atom.drive_towards(get_global_mouse_position())
+
 func _update_boost_particles() -> void:
 	"""Update boost particle emission based on atom state"""
 	if boost_particles == null or atom == null:
@@ -28,12 +32,7 @@ func _update_boost_particles() -> void:
 		var opposite_angle = velocity_direction.angle() + PI
 		
 		# Set particle emission direction (opposite to movement)
-		var material = boost_particles.process_material as ParticleProcessMaterial
-		if material != null:
+		var particle_material = boost_particles.process_material as ParticleProcessMaterial
+		if particle_material != null:
 			# Convert angle to Vector3 for the particle material
-			material.direction = Vector3(cos(opposite_angle), sin(opposite_angle), 0)
-
-func _physics_process(_delta):
-	if atom != null and atom.has_method("drive_towards"):
-		atom.drive_towards(get_global_mouse_position())
-		_update_boost_particles()
+			particle_material.direction = Vector3(cos(opposite_angle), sin(opposite_angle), 0)
