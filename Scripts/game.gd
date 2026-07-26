@@ -6,7 +6,7 @@ extends Node2D
 @export var goal_margin: float = 220.0
 @export var game_over_time_scale: float = 0.22
 @export var points_per_second_in_goal: float = 1.0
-@export var energy_per_photon: float = 6.0
+@export var energy_per_photon: float = 8.0
 
 const GOAL_VISUAL_SEGMENTS: int = 64
 const PHASE_CLEAR_BONUS: int = 1_000_000
@@ -743,12 +743,12 @@ func _update_goal_danger_visual() -> void:
 	
 	# Shift color from green to orange-red as danger increases
 	var base_green = Color(0.0, 0.8, 0.0, 0.25)
-	var danger_orange = Color(0.9, 0.4, 0.0, 0.35)
+	var danger_orange = Color(0.0, 0.8, 0.0, 0.25)
 	goal_fill.color = base_green.lerp(danger_orange, danger_level)
 	
 	# Make outline more intense with danger
 	var outline_green = Color(0.0, 1.0, 0.0, 0.6)
-	var outline_red = Color(1.0, 0.3, 0.0, 0.85)
+	var outline_red = Color(0.0, 1.0, 0.0, 0.6)
 	goal_outline.default_color = outline_green.lerp(outline_red, danger_level)
 	
 	# Increase outline width with danger

@@ -93,7 +93,7 @@ var isotopes = {
 		"neutrons": 134,
 		"decay_type": "alpha",
 		"next_isotope": "Pb-214",
-		"timer_range": [30, 60],  # shorter timer
+		"timer_range": [40, 60],  # shorter timer
 		"disk_radius": 60.0,
 		"sprite_color": Color(0.9, 0.9, 0.3),  # yellow
 		"proton_tint": Color(0.95, 0.95, 0.4)  # bright yellow
@@ -129,7 +129,7 @@ var isotopes = {
 		"neutrons": 130,
 		"decay_type": "alpha",
 		"next_isotope": "Pb-210",
-		"timer_range": [20, 50],  # very short timer
+		"timer_range": [30, 50],  # very short timer
 		"disk_radius": 58.0,
 		"sprite_color": Color(0.95, 0.85, 0.2),  # bright yellow
 		"proton_tint": Color(1.0, 0.9, 0.3)  # intense yellow

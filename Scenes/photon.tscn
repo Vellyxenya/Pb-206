@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://dpw7x8miargkq" path="res://Scripts/photon.gd" id="1_photon"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_photon"]
-radius = 15.0
+radius = 20.0
 
 [node name="Photon" type="Area2D" unique_id=1765940441 groups=["collectibles"]]
 collision_layer = 8
